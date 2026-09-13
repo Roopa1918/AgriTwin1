@@ -36,6 +36,7 @@ export default function DynamicDigitalTwin({ height = 540 }) {
   });
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [animalAlertActive, setAnimalAlertActive] = useState(true);
+  const [webglError, setWebglError] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -47,16 +48,24 @@ export default function DynamicDigitalTwin({ height = 540 }) {
     scene.background = new THREE.Color(0x0a1c15);
     scene.fog = new THREE.FogExp2(0x0a1c15, 0.02);
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 100);
+    const camera = new THREE.PerspectiveCamera(45, width / (height || 540), 0.5, 100);
     camera.position.set(0, 13, 16);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    rendererRef.current = renderer;
-    container.replaceChildren(renderer.domElement);
+    let renderer = null;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(width, height || 540);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.shadowMap.enabled = true;
+      rendererRef.current = renderer;
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+    } catch (err) {
+      console.warn('[AgriTwin 3D] WebGL unsupported or context initialization failed:', err);
+      setWebglError(true);
+      return;
+    }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -416,6 +425,50 @@ export default function DynamicDigitalTwin({ height = 540 }) {
       controlsRef.current.update();
     }
   };
+
+  if (webglError) {
+    return (
+      <div className="twin-3d-wrapper" style={{ minHeight: '340px', padding: '20px', background: '#091c14', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid var(--border-medium)' }}>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+            <div className="twin-overlay-badge">
+              <span className="pulse-dot" style={{ background: '#10b981' }} />
+              <span>Digital Twin: <strong>{activeField?.name} ({activeField?.crop})</strong> (2D Canopy Mode)</span>
+            </div>
+            <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>4 Precision Zones Active</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '12px', margin: '14px 0' }}>
+            {zones.map((z, idx) => (
+              <div key={z.id} style={{
+                background: z.soilWater < 25 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.1)',
+                border: `1px solid ${z.soilWater < 25 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.3)'}`,
+                borderRadius: 'var(--radius-md)',
+                padding: '12px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>
+                  <span>{z.name}</span>
+                  <span style={{ color: z.soilWater < 25 ? '#f87171' : 'var(--emerald-400)' }}>{z.soilWater?.toFixed(1)}%</span>
+                </div>
+                <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', marginTop: '8px', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min(100, (z.soilWater / 50) * 100)}%`, height: '100%', background: z.soilWater < 25 ? '#ef4444' : '#10b981', borderRadius: '3px' }} />
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '6px' }}>
+                  Sensor: {z.sensorId || `SM-Z0${idx + 1}`} &bull; Status: {z.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+          <button onClick={waterZone2} className="btn btn-water btn-sm">
+            <Droplets size={14} /> {isIrrigatingZone2 ? 'Watering Active...' : 'Water Zone 2'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="twin-3d-wrapper" style={{ height: `${height}px`, position: 'relative' }}>

@@ -89,28 +89,42 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
     if (!mapContainerRef.current) return;
 
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
+      try {
+        mapInstanceRef.current.remove();
+      } catch (e) {
+        // ignore
+      }
       mapInstanceRef.current = null;
     }
 
-    const map = L.map(mapContainerRef.current, {
-      center: [fieldCenter.lat, fieldCenter.lng],
-      zoom: 15,
-      zoomControl: false,
-      dragging: true,
-      touchZoom: true,
-      scrollWheelZoom: true,
-      doubleClickZoom: true,
-      boxZoom: true,
-      keyboard: true,
-      tap: false, // Critical: Disables buggy touch emulation so mouse and touch drag freely
-      trackResize: true,
-      inertia: true,
-      inertiaDeceleration: 3000,
-      inertiaMaxSpeed: Infinity,
-      easeLinearity: 0.2
-    });
-    mapInstanceRef.current = map;
+    if (mapContainerRef.current._leaflet_id) {
+      delete mapContainerRef.current._leaflet_id;
+    }
+
+    let map;
+    try {
+      map = L.map(mapContainerRef.current, {
+        center: [fieldCenter.lat, fieldCenter.lng],
+        zoom: 15,
+        zoomControl: false,
+        dragging: true,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true,
+        tap: false, // Critical: Disables buggy touch emulation so mouse and touch drag freely
+        trackResize: true,
+        inertia: true,
+        inertiaDeceleration: 3000,
+        inertiaMaxSpeed: Infinity,
+        easeLinearity: 0.2
+      });
+      mapInstanceRef.current = map;
+    } catch (err) {
+      console.warn('[AgriTwin Map] Leaflet map initialization warning:', err);
+      return;
+    }
 
     // Explicitly enable all pan and zoom handlers
     map.dragging.enable();

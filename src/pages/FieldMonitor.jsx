@@ -21,27 +21,41 @@ export default function FieldMonitor() {
     if (viewMode !== '2d' || !mapContainerRef.current) return;
 
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
+      try {
+        mapInstanceRef.current.remove();
+      } catch (e) {
+        // ignore
+      }
       mapInstanceRef.current = null;
+    }
+
+    if (mapContainerRef.current._leaflet_id) {
+      delete mapContainerRef.current._leaflet_id;
     }
 
     const lat = activeField?.latitude || 11.0168;
     const lon = activeField?.longitude || 76.9558;
 
-    const map = L.map(mapContainerRef.current, {
-      center: [lat, lon],
-      zoom: 16,
-      zoomControl: true,
-      dragging: true,
-      touchZoom: true,
-      scrollWheelZoom: true,
-      doubleClickZoom: true,
-      boxZoom: true,
-      keyboard: true,
-      tap: false,
-      trackResize: true
-    });
-    mapInstanceRef.current = map;
+    let map;
+    try {
+      map = L.map(mapContainerRef.current, {
+        center: [lat, lon],
+        zoom: 16,
+        zoomControl: true,
+        dragging: true,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true,
+        tap: false,
+        trackResize: true
+      });
+      mapInstanceRef.current = map;
+    } catch (err) {
+      console.warn('[AgriTwin Map] 2D map initialization warning:', err);
+      return;
+    }
 
     map.dragging.enable();
     map.touchZoom.enable();

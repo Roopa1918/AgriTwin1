@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FieldsProvider, useFields } from './context/FieldsContext';
 import { TelemetryProvider } from './context/TelemetryContext';
+import { SettingsProvider } from './context/SettingsContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 import SimpleNavbar from './components/layout/SimpleNavbar';
 import AddFieldModal from './components/fields/AddFieldModal';
@@ -225,9 +227,11 @@ function AppContent() {
           </div>
         </header>
 
-        {/* Page View */}
+        {/* Page View with Granular Safety Boundary */}
         <main className="main-content-scroll">
-          {renderActiveTab()}
+          <ErrorBoundary compact title="Farm Section Display Notice" onReset={() => setTab('home')}>
+            {renderActiveTab()}
+          </ErrorBoundary>
         </main>
       </div>
 
@@ -251,12 +255,16 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <FieldsProvider>
-        <TelemetryProvider>
-          <AppContent />
-        </TelemetryProvider>
-      </FieldsProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <SettingsProvider>
+        <AuthProvider>
+          <FieldsProvider>
+            <TelemetryProvider>
+              <AppContent />
+            </TelemetryProvider>
+          </FieldsProvider>
+        </AuthProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 }

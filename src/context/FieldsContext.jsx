@@ -37,17 +37,29 @@ export function FieldsProvider({ children }) {
   });
 
   const [activeFieldId, setActiveFieldId] = useState(() => {
-    return localStorage.getItem('agritwin_active_field_id') || null;
+    try {
+      return localStorage.getItem('agritwin_active_field_id') || null;
+    } catch (e) {
+      return null;
+    }
   });
 
   // Persist to local storage
   useEffect(() => {
-    localStorage.setItem('agritwin_user_fields', JSON.stringify(fields));
+    try {
+      localStorage.setItem('agritwin_user_fields', JSON.stringify(fields));
+    } catch (e) {
+      // safe fallback
+    }
   }, [fields]);
 
   useEffect(() => {
-    if (activeFieldId) {
-      localStorage.setItem('agritwin_active_field_id', activeFieldId);
+    try {
+      if (activeFieldId) {
+        localStorage.setItem('agritwin_active_field_id', activeFieldId);
+      }
+    } catch (e) {
+      // safe fallback
     }
   }, [activeFieldId]);
 
