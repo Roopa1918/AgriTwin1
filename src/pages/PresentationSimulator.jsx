@@ -83,7 +83,7 @@ export default function PresentationSimulator({ setTab }) {
             </div>
           </div>
 
-          <div style={{ minWidth: '320px', maxWidth: '480px', background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ minWidth: 'min(100%, 320px)', maxWidth: '480px', background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Active Decision Advisory</span>
             <p style={{ fontSize: '0.86rem', color: '#fff', fontWeight: 600, marginTop: '4px' }}>
               "{z2Rec?.recommendation || 'No immediate irrigation required.'}"
@@ -96,7 +96,7 @@ export default function PresentationSimulator({ setTab }) {
       </div>
 
       {/* Simulator Engine Controls Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
         {/* Scenario & Speed Selectors */}
         <div className="glass-card">
           <h3 style={{ fontSize: '1.1rem', marginBottom: '14px', color: '#fff' }}>

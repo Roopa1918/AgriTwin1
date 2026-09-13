@@ -62,43 +62,46 @@ export default function HomeDashboard({ setTab }) {
       </div>
 
       {/* Big Field Status Banner (PRD Section 11) */}
-      <div style={{
-        background: fieldStatusText === 'Needs Water' ? 'rgba(239, 68, 68, 0.16)' : fieldStatusText === 'Watch' ? 'rgba(245, 158, 11, 0.16)' : 'rgba(16, 185, 129, 0.16)',
-        border: `2px solid ${fieldStatusText === 'Needs Water' ? '#ef4444' : fieldStatusText === 'Watch' ? '#f59e0b' : '#10b981'}`,
-        borderRadius: 'var(--radius-xl)',
-        padding: '24px 28px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      <div 
+        className="field-status-banner"
+        style={{
+          background: fieldStatusText === 'Needs Water' ? 'rgba(239, 68, 68, 0.16)' : fieldStatusText === 'Watch' ? 'rgba(245, 158, 11, 0.16)' : 'rgba(16, 185, 129, 0.16)',
+          border: `2px solid ${fieldStatusText === 'Needs Water' ? '#ef4444' : fieldStatusText === 'Watch' ? '#f59e0b' : '#10b981'}`,
+          borderRadius: 'var(--radius-xl)',
+          padding: '24px 28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}
+      >
         <div>
           <span style={{ fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.06em' }}>
             YOUR FIELD STATUS
           </span>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
+          <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
             {fieldStatusBadge}
           </div>
-          <p style={{ fontSize: '1.05rem', color: '#f1f5f9', fontWeight: 500 }}>
+          <p style={{ fontSize: 'clamp(0.9rem, 3.5vw, 1.05rem)', color: '#f1f5f9', fontWeight: 500 }}>
             "{fieldStatusMessage}"
           </p>
         </div>
 
         {fieldStatusText === 'Needs Water' && (
-          <button onClick={waterZone2} className="btn btn-water" style={{ padding: '14px 22px', fontSize: '1rem' }}>
+          <button onClick={waterZone2} className="btn btn-water status-btn" style={{ padding: '12px 20px', fontSize: '0.96rem' }}>
             <Droplets size={18} />
             <span>{isIrrigatingZone2 ? 'Watering Active...' : 'Water Zone 2 Now'}</span>
           </button>
         )}
       </div>
 
-      {/* 6 Large Primary Farmer Cards (PRD Section 10) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+      {/* 6 Large Primary Farmer Cards (PRD Section 10) — Exact 2-col on Mobile */}
+      <div className="home-metrics-grid">
         {/* Card 1: Field Temperature */}
-        <div className="metric-card" style={{ padding: '22px' }}>
+        <div className="metric-card">
           <div className="metric-card-top">
-            <span className="metric-card-label">Field Temperature</span>
+            <span className="metric-card-label">Temperature</span>
             <div className="metric-card-icon" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
               <Thermometer size={18} />
             </div>
@@ -108,12 +111,12 @@ export default function HomeDashboard({ setTab }) {
             <span className="metric-card-unit">C</span>
           </div>
           <div className="metric-card-footer">
-            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE WEATHER</span>
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE</span>
           </div>
         </div>
 
         {/* Card 2: Air Moisture */}
-        <div className="metric-card" style={{ padding: '22px' }}>
+        <div className="metric-card">
           <div className="metric-card-top">
             <span className="metric-card-label">Air Moisture</span>
             <div className="metric-card-icon" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
@@ -125,12 +128,12 @@ export default function HomeDashboard({ setTab }) {
             <span className="metric-card-unit">%</span>
           </div>
           <div className="metric-card-footer">
-            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE WEATHER</span>
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE</span>
           </div>
         </div>
 
         {/* Card 3: Soil Water */}
-        <div className="metric-card" style={{ padding: '22px' }}>
+        <div className="metric-card">
           <div className="metric-card-top">
             <span className="metric-card-label">Soil Water</span>
             <div className="metric-card-icon">
@@ -148,7 +151,7 @@ export default function HomeDashboard({ setTab }) {
         </div>
 
         {/* Card 4: Rain */}
-        <div className="metric-card" style={{ padding: '22px' }}>
+        <div className="metric-card">
           <div className="metric-card-top">
             <span className="metric-card-label">Rain</span>
             <div className="metric-card-icon" style={{ background: 'rgba(2, 132, 199, 0.15)', color: '#0284c7' }}>
@@ -160,49 +163,49 @@ export default function HomeDashboard({ setTab }) {
             <span className="metric-card-unit">mm</span>
           </div>
           <div className="metric-card-footer">
-            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE WEATHER</span>
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.72rem' }}>🟢 LIVE</span>
           </div>
         </div>
 
-        {/* Card 5: Water Need */}
-        <div className="metric-card" style={{ padding: '22px' }}>
+        {/* Card 5: Crop Condition */}
+        <div className="metric-card">
           <div className="metric-card-top">
-            <span className="metric-card-label">Water Need</span>
-            <div className="metric-card-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }}>
-              <Droplets size={18} />
-            </div>
-          </div>
-          <div className="metric-card-value-row">
-            <span className="metric-card-value" style={{ color: waterNeed === 'High' ? '#f87171' : waterNeed === 'Medium' ? '#fbbf24' : '#34d399', fontSize: '1.8rem' }}>
-              {waterNeed}
-            </span>
-          </div>
-          <div className="metric-card-footer">
-            <span>{waterNeed === 'High' ? 'Water Soon' : 'Adequate'}</span>
-          </div>
-        </div>
-
-        {/* Card 6: Crop Condition */}
-        <div className="metric-card" style={{ padding: '22px' }}>
-          <div className="metric-card-top">
-            <span className="metric-card-label">Crop Condition</span>
-            <div className="metric-card-icon">
+            <span className="metric-card-label">Crop Status</span>
+            <div className="metric-card-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
               <ShieldCheck size={18} />
             </div>
           </div>
           <div className="metric-card-value-row">
-            <span className="metric-card-value" style={{ fontSize: '1.8rem', color: cropCondition === 'Good' ? '#34d399' : '#fbbf24' }}>
-              {cropCondition}
+            <span className="metric-card-value" style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.75rem)', color: cropCondition.status === 'Good' ? 'var(--emerald-400)' : '#f87171' }}>
+              {cropCondition.status}
             </span>
           </div>
           <div className="metric-card-footer">
-            <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.72rem' }}>DEMO</span>
+            <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>Score {cropCondition.healthScore}%</span>
+          </div>
+        </div>
+
+        {/* Card 6: Water Need */}
+        <div className="metric-card" style={{ borderColor: waterNeed.status.includes('Zone 2') ? 'rgba(239, 68, 68, 0.5)' : 'var(--border-subtle)' }}>
+          <div className="metric-card-top">
+            <span className="metric-card-label">Water Need</span>
+            <div className="metric-card-icon" style={{ background: waterNeed.status.includes('Zone 2') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.12)', color: waterNeed.status.includes('Zone 2') ? '#f87171' : 'var(--emerald-400)' }}>
+              <Droplets size={18} />
+            </div>
+          </div>
+          <div className="metric-card-value-row">
+            <span className="metric-card-value" style={{ fontSize: 'clamp(1.05rem, 4.2vw, 1.45rem)', color: waterNeed.status.includes('Zone 2') ? '#fca5a5' : '#34d399' }}>
+              {waterNeed.status}
+            </span>
+          </div>
+          <div className="metric-card-footer">
+            <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.72rem' }}>AI IRRIGATION</span>
           </div>
         </div>
       </div>
 
       {/* ADVANCED FIELD SENTINEL ROW — Plant Grid, Animal Intrusion & Camera System */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+      <div className="sentinel-grid-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
         {/* Plant Health & Pest Sentinel */}
         <div
           onClick={() => setTab('plant-health')}
@@ -299,15 +302,15 @@ export default function HomeDashboard({ setTab }) {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
             Connect RTSP solar feeds, capture high-res snapshots, and execute edge AI diagnostics.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#7dd3fc', fontSize: '0.8rem', fontWeight: 700 }}>
-            <span>View Optical Feeds</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38bdf8', fontSize: '0.8rem', fontWeight: 700 }}>
+            <span>Open Camera Stream</span>
             <ArrowRight size={14} />
           </div>
         </div>
       </div>
 
       {/* 4-Zone Water Summary & Today's Weather Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
         {/* 4-Zone Water Grid (PRD Section 14 & 38) */}
         <div className="glass-card">
           <div className="glass-card-header">

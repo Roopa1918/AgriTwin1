@@ -121,20 +121,20 @@ export default function WaterPage() {
                   border: `1px solid ${isLow ? 'rgba(239, 68, 68, 0.4)' : isWatch ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                   <div>
                     <h4 style={{ fontSize: '1.1rem', color: '#fff' }}>{z.name}</h4>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Soil Water Sensor: {z.sensorId}</span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>
                       {z.soilWater?.toFixed(1)}%
                     </span>
                     <span style={{
                       fontWeight: 800,
-                      fontSize: '0.85rem',
-                      padding: '4px 10px',
+                      fontSize: '0.8rem',
+                      padding: '3px 8px',
                       borderRadius: '6px',
                       background: isLow ? 'rgba(239, 68, 68, 0.25)' : isWatch ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.25)',
                       color: isLow ? '#f87171' : isWatch ? '#fbbf24' : '#34d399'
@@ -158,11 +158,11 @@ export default function WaterPage() {
                 </div>
 
                 {isLow && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
                     <span style={{ fontSize: '0.8rem', color: '#f87171' }}>
                       ⚠️ Soil water is below the safe 25% threshold for {activeField?.crop || 'crops'}.
                     </span>
-                    <button onClick={handleWaterClick} className="btn btn-water btn-sm">
+                    <button onClick={handleWaterClick} className="btn btn-water btn-sm" style={{ minHeight: '40px' }}>
                       Water Zone 2
                     </button>
                   </div>

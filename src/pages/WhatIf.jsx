@@ -91,7 +91,7 @@ export default function WhatIf() {
         <h3 style={{ fontSize: '1.1rem', color: '#fff', marginBottom: '14px' }}>
           Choose a Weather Condition to Try:
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '12px' }}>
           {Object.values(scenarios).map(sc => {
             const isSelected = selectedScenario === sc.id;
             return (
@@ -99,21 +99,29 @@ export default function WhatIf() {
                 key={sc.id}
                 onClick={() => setSelectedScenario(sc.id)}
                 style={{
-                  background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'var(--bg-surface-card)',
+                  background: isSelected ? 'rgba(16, 185, 129, 0.22)' : 'var(--bg-surface-card)',
                   border: `2px solid ${isSelected ? 'var(--emerald-400)' : 'var(--border-subtle)'}`,
                   borderRadius: 'var(--radius-lg)',
-                  padding: '18px',
+                  padding: '16px 14px',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '12px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isSelected ? 'var(--glow-emerald)' : 'none'
+                  textAlign: 'left',
+                  transition: 'all 0.2s',
+                  boxShadow: isSelected ? '0 0 20px rgba(16, 185, 129, 0.2)' : 'none',
+                  minHeight: '44px'
                 }}
               >
-                <span style={{ fontSize: '2.5rem' }}>{sc.icon}</span>
-                <strong style={{ fontSize: '1.05rem', color: '#fff' }}>{sc.title}</strong>
+                <span style={{ fontSize: '2rem' }}>{sc.icon}</span>
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>
+                    {sc.title}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--emerald-400)' : 'var(--text-muted)' }}>
+                    {sc.tempDelta} &bull; Rain {sc.rainDelta}
+                  </div>
+                </div>
               </button>
             );
           })}
@@ -121,7 +129,7 @@ export default function WhatIf() {
       </div>
 
       {/* Scenario Result Box (PRD Section 19) */}
-      <div className="glass-card" style={{ padding: '28px', border: '2px solid var(--emerald-400)' }}>
+      <div className="glass-card" style={{ padding: 'clamp(16px, 4vw, 28px)', border: '2px solid var(--emerald-400)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
           <span style={{ fontSize: '2rem' }}>{current.icon}</span>
           <div>
@@ -135,7 +143,7 @@ export default function WhatIf() {
         </div>
 
         {/* Changes Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '22px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '12px', marginBottom: '22px' }}>
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Temperature Shift</span>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f59e0b', marginTop: '4px' }}>

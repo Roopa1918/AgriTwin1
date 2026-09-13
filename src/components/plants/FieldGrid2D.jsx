@@ -13,6 +13,9 @@ export default function FieldGrid2D({
   rowsCount = 6,
   colsCount = 6
 }) {
+  const [cellZoom, setCellZoom] = React.useState(1.0); // 0.8, 1.0, 1.25
+  const [filterStatus, setFilterStatus] = React.useState('ALL'); // 'ALL' | 'healthy' | 'watch' | 'attention'
+
   // Determine if a specific plant belongs to any active hotspot cluster
   const isPlantInHotspot = (plantId) => {
     return hotspots.some(h => h.plantIds && h.plantIds.includes(plantId));
@@ -56,10 +59,12 @@ export default function FieldGrid2D({
     }
   };
 
+  const colWidth = Math.round(84 * cellZoom);
+
   return (
-    <div className="glass-card" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-      {/* Header with Legend */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+    <div className="glass-card" style={{ padding: 'clamp(14px, 3.5vw, 20px)', borderRadius: 'var(--radius-lg)', maxWidth: '100%', overflow: 'hidden' }}>
+      {/* Header with Legend & Zoom Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
         <div>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🌱</span> Field Plant Matrix ({rowsCount} × {colsCount} Grid)
@@ -69,25 +74,71 @@ export default function FieldGrid2D({
           </p>
         </div>
 
-        {/* Status Legend */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#34d399' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-            <span>Healthy</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#fbbf24' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} />
-            <span>Watch</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#f87171' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
-            <span>Needs Attention</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: 'var(--text-dim)' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }} />
-            <span>Not Scanned</span>
-          </div>
+        {/* Zoom Controls (PRD Section 10) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 700 }}>ZOOM:</span>
+          <button
+            type="button"
+            onClick={() => setCellZoom(prev => Math.max(0.75, +(prev - 0.15).toFixed(2)))}
+            className="btn btn-secondary btn-sm"
+            style={{ minHeight: '34px', minWidth: '34px', padding: '0 8px', fontSize: '0.85rem' }}
+            title="Zoom Out Matrix"
+          >
+            -
+          </button>
+          <button
+            type="button"
+            onClick={() => setCellZoom(1.0)}
+            className="btn btn-secondary btn-sm"
+            style={{ minHeight: '34px', padding: '0 8px', fontSize: '0.72rem' }}
+            title="Reset Zoom"
+          >
+            100%
+          </button>
+          <button
+            type="button"
+            onClick={() => setCellZoom(prev => Math.min(1.4, +(prev + 0.15).toFixed(2)))}
+            className="btn btn-secondary btn-sm"
+            style={{ minHeight: '34px', minWidth: '34px', padding: '0 8px', fontSize: '0.85rem' }}
+            title="Zoom In Matrix"
+          >
+            +
+          </button>
         </div>
+      </div>
+
+      {/* Filter Pill Tabs: [All] [Healthy] [Watch] [Problem] (PRD Section 10) */}
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
+        {[
+          { id: 'ALL', label: 'All Plants' },
+          { id: 'healthy', label: 'Healthy (🟢)' },
+          { id: 'watch', label: 'Watch (🟡)' },
+          { id: 'attention', label: 'Problem (🔴)' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setFilterStatus(tab.id)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 'var(--radius-md)',
+              background: filterStatus === tab.id ? 'var(--emerald-500)' : 'rgba(255,255,255,0.04)',
+              color: filterStatus === tab.id ? '#000' : 'var(--text-muted)',
+              border: filterStatus === tab.id ? 'none' : '1px solid var(--border-subtle)',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              minHeight: '36px'
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile Scroll Hint Notice */}
+      <div style={{ fontSize: '0.72rem', color: 'var(--emerald-400)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+        <span>👈 Swipe horizontally to explore full field grid 👉</span>
       </div>
 
       {/* Hotspots Callout Alert */}
@@ -96,12 +147,12 @@ export default function FieldGrid2D({
           background: 'linear-gradient(90deg, rgba(239, 68, 68, 0.16) 0%, rgba(245, 158, 11, 0.12) 100%)',
           border: '1px solid rgba(239, 68, 68, 0.4)',
           borderRadius: 'var(--radius-md)',
-          padding: '12px 16px',
-          marginBottom: '18px',
+          padding: '10px 14px',
+          marginBottom: '14px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
+          gap: '10px',
           flexWrap: 'wrap'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -117,22 +168,28 @@ export default function FieldGrid2D({
               </div>
             </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
-            Highlighted with pulsating borders in the grid
+          <div style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
+            Pulsating borders in grid
           </div>
         </div>
       )}
 
-      {/* 2D Grid Layout Container */}
-      <div style={{
-        overflowX: 'auto',
-        paddingBottom: '8px'
-      }}>
+      {/* 2D Grid Layout Container — Only this container scrolls horizontally */}
+      <div 
+        className="plant-grid-scroll-box"
+        style={{
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          width: '100%',
+          maxWidth: '100%',
+          paddingBottom: '10px'
+        }}
+      >
         <div style={{
           display: 'grid',
-          gridTemplateColumns: `40px repeat(${colsCount}, minmax(88px, 1fr))`,
+          gridTemplateColumns: `36px repeat(${colsCount}, minmax(${colWidth}px, 1fr))`,
           gap: '8px',
-          minWidth: '580px'
+          minWidth: `${36 + colsCount * (colWidth + 8)}px`
         }}>
           {/* Header Row: Column numbers */}
           <div /> {/* Top-left empty corner */}

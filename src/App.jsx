@@ -30,7 +30,8 @@ import AnimalAlertsPage from './pages/AnimalAlertsPage';
 import FieldCameraPage from './pages/FieldCameraPage';
 import Alerts from './pages/Alerts';
 
-import { Plus, MapPin, Sparkles, LogOut, ChevronDown } from 'lucide-react';
+import MobileBottomNav from './components/layout/MobileBottomNav';
+import { Plus, MapPin, Sparkles, LogOut, ChevronDown, Bell, Menu } from 'lucide-react';
 
 function AppContent() {
   const { isAuthenticated, logout, isDemo } = useAuth();
@@ -38,6 +39,7 @@ function AppContent() {
   const [currentTab, setTab] = useState('home');
   const [isAddFieldOpen, setIsAddFieldOpen] = useState(false);
   const [isSelectingField, setIsSelectingField] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   // Requirement 1: When user opens AgriTwin, first screen must always be Login
   if (!isAuthenticated) {
@@ -102,7 +104,7 @@ function AppContent() {
 
   return (
     <div className="app-layout">
-      {/* Farmer Navigation Sidebar */}
+      {/* Farmer Navigation Sidebar (Desktop >= 1024px) */}
       <SimpleNavbar
         currentTab={currentTab}
         setTab={setTab}
@@ -111,8 +113,10 @@ function AppContent() {
 
       {/* Main App Content Wrapper */}
       <div className="main-wrapper">
-        {/* Top Header — PRD Section 17: Active Field Display & "Change Field" Button */}
-        <header className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
+        {/* ================================================================
+            DESKTOP HEADER (>= 1024px) — Preserved Desktop Design
+            ================================================================ */}
+        <header className="app-header header-desktop">
           {/* Active Field Details */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '1.9rem' }}>{activeField?.cropIcon || '🌾'}</span>
@@ -141,7 +145,7 @@ function AppContent() {
               </div>
             </div>
 
-            {/* Change Field Button — PRD Section 17 */}
+            {/* Change Field Button */}
             <button
               onClick={() => setTab('my-fields')}
               className="btn btn-secondary btn-sm"
@@ -179,11 +183,62 @@ function AppContent() {
           </div>
         </header>
 
+        {/* ================================================================
+            MOBILE COMPACT HEADER (< 1024px) — PRD Section 3
+            ================================================================ */}
+        <header className="app-header header-mobile">
+          <div className="mobile-header-brand">
+            <span className="mobile-header-logo">🌱</span>
+            <span className="mobile-header-title">AgriTwin</span>
+            <button
+              type="button"
+              onClick={() => setTab('my-fields')}
+              className="mobile-header-field-chip"
+              title="Click to change field"
+            >
+              <span>{activeField?.cropIcon || '🌾'}</span>
+              <span className="mobile-field-chip-name">{activeField?.name || 'My Field'}</span>
+            </button>
+          </div>
+
+          <div className="mobile-header-actions">
+            {/* Quick Alerts Bell Shortcut */}
+            <button
+              type="button"
+              onClick={() => setTab('alerts')}
+              className="mobile-header-icon-btn"
+              aria-label="View Alerts"
+            >
+              <Bell size={20} />
+              <span className="mobile-alert-dot" />
+            </button>
+
+            {/* Menu Drawer Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+              className="mobile-header-icon-btn"
+              aria-label="Open Farm Menu"
+            >
+              <Menu size={22} />
+            </button>
+          </div>
+        </header>
+
         {/* Page View */}
-        <main style={{ flex: 1, paddingBottom: '36px' }}>
+        <main className="main-content-scroll">
           {renderActiveTab()}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (< 1024px) */}
+      <MobileBottomNav
+        currentTab={currentTab}
+        setTab={setTab}
+        onOpenAddField={() => setIsSelectingField(true)}
+        isMoreOpen={isMoreOpen}
+        setIsMoreOpen={setIsMoreOpen}
+      />
 
       {/* Modal Wizard for Field Creation */}
       <AddFieldModal

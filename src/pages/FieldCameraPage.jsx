@@ -113,40 +113,36 @@ export default function FieldCameraPage({ onNavigateToAnimalAlerts }) {
       </div>
 
       {/* Camera Selection Switcher */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '12px', marginBottom: '22px' }}>
         {cameras.map(cam => {
           const isSelected = selectedCam === cam.id;
           return (
             <div
               key={cam.id}
-              onClick={() => {
-                setSelectedCam(cam.id);
-                setCapturedSnapshot(null);
-                setDetectionResult(null);
-              }}
+              onClick={() => { setSelectedCam(cam.id); setCapturedSnapshot(null); setDetectionResult(null); }}
+              className="glass-card"
               style={{
-                background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface-card)',
-                border: isSelected ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '14px 18px',
+                padding: '14px 16px',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                boxShadow: isSelected ? '0 0 20px rgba(16, 185, 129, 0.2)' : 'none'
+                border: isSelected ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
+                background: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.02)',
+                transition: 'all 0.2s'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 800 }}>
-                  {cam.zone}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Camera size={16} color={isSelected ? 'var(--emerald-400)' : 'var(--text-muted)'} />
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>{cam.zone}</span>
+                </div>
                 <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: '#34d399',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  padding: '2px 7px',
-                  borderRadius: '10px'
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  color: cam.status === 'LIVE' ? '#34d399' : '#fbbf24',
+                  background: cam.status === 'LIVE' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                  padding: '2px 6px',
+                  borderRadius: '6px'
                 }}>
-                  {cam.status}
+                  ● {cam.status}
                 </span>
               </div>
               <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#fff' }}>
@@ -158,7 +154,7 @@ export default function FieldCameraPage({ onNavigateToAnimalAlerts }) {
       </div>
 
       {/* Main Viewport & Video Frame Box */}
-      <div className="glass-card" style={{ padding: '22px', marginBottom: '26px' }}>
+      <div className="glass-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)', marginBottom: '26px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 800 }}>
@@ -176,7 +172,7 @@ export default function FieldCameraPage({ onNavigateToAnimalAlerts }) {
               style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <Upload size={14} />
-              <span>Upload Custom Snapshot</span>
+              <span>Upload Snapshot</span>
               <input
                 id="camera-snapshot-upload"
                 type="file"
@@ -202,7 +198,7 @@ export default function FieldCameraPage({ onNavigateToAnimalAlerts }) {
           borderRadius: 'var(--radius-lg)',
           overflow: 'hidden',
           border: '1px solid var(--border-medium)',
-          height: '420px',
+          height: 'clamp(240px, 45vw, 420px)',
           background: '#040d09',
           position: 'relative'
         }}>

@@ -61,31 +61,82 @@ export default function RawSensorData() {
           </span>
         </div>
 
-        <div className="terminal-body">
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ color: 'var(--emerald-400)', borderBottom: '1px solid rgba(16, 185, 129, 0.25)', fontSize: '0.78rem' }}>
-                <th style={{ padding: '12px' }}>Time</th>
-                <th style={{ padding: '12px' }}>Sensor</th>
-                <th style={{ padding: '12px' }}>Zone</th>
-                <th style={{ padding: '12px' }}>Reading</th>
-                <th style={{ padding: '12px' }}>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {streamRows.map((row, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '12px', color: '#94a3b8' }}>{row.time}</td>
-                  <td style={{ padding: '12px', color: '#38bdf8', fontWeight: 700 }}>{row.sensor}</td>
-                  <td style={{ padding: '12px', color: '#fff' }}>{row.zone}</td>
-                  <td style={{ padding: '12px', color: '#cbd5e1' }}>{row.reading}</td>
-                  <td style={{ padding: '12px', color: row.value.includes('24.') || row.value.includes('25.') ? '#f87171' : 'var(--emerald-400)', fontWeight: 800 }}>
-                    {row.value}
-                  </td>
+        <div className="terminal-body" style={{ padding: 'clamp(10px, 3vw, 18px)' }}>
+          {/* Desktop Table View (>= 768px) */}
+          <div className="table-desktop-view">
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ color: 'var(--emerald-400)', borderBottom: '1px solid rgba(16, 185, 129, 0.25)', fontSize: '0.78rem' }}>
+                  <th style={{ padding: '12px' }}>Time</th>
+                  <th style={{ padding: '12px' }}>Sensor</th>
+                  <th style={{ padding: '12px' }}>Zone</th>
+                  <th style={{ padding: '12px' }}>Reading</th>
+                  <th style={{ padding: '12px' }}>Value</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {streamRows.map((row, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                    <td style={{ padding: '12px', color: '#94a3b8' }}>{row.time}</td>
+                    <td style={{ padding: '12px', color: '#38bdf8', fontWeight: 700 }}>{row.sensor}</td>
+                    <td style={{ padding: '12px', color: '#fff' }}>{row.zone}</td>
+                    <td style={{ padding: '12px', color: '#cbd5e1' }}>{row.reading}</td>
+                    <td style={{ padding: '12px', color: row.value.includes('24.') || row.value.includes('25.') ? '#f87171' : 'var(--emerald-400)', fontWeight: 800 }}>
+                      {row.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View (< 768px) — PRD Section 11 */}
+          <div className="table-mobile-card-view">
+            {streamRows.map((row, idx) => {
+              const isAlert = row.value.includes('24.') || row.value.includes('25.');
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: isAlert ? 'rgba(239, 68, 68, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                    border: `1px solid ${isAlert ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.2)'}`,
+                    borderRadius: 'var(--radius-md)',
+                    padding: '12px 14px',
+                    fontFamily: 'var(--font-mono)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.94rem' }}>
+                      {row.sensor}
+                    </span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.74rem' }}>
+                      {row.time}
+                    </span>
+                  </div>
+
+                  <div style={{ color: '#fff', fontSize: '0.82rem' }}>
+                    {row.zone}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                    <span style={{ color: '#cbd5e1', fontSize: '0.8rem' }}>
+                      {row.reading}:
+                    </span>
+                    <span style={{
+                      color: isAlert ? '#f87171' : 'var(--emerald-400)',
+                      fontWeight: 800,
+                      fontSize: '1rem'
+                    }}>
+                      {row.value}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

@@ -150,7 +150,7 @@ export default function Login() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'radial-gradient(circle at 50% 15%, #0d2e22 0%, #061811 65%, #030a07 100%)',
-      padding: '24px 16px',
+      padding: 'clamp(14px, 3.5vw, 24px) clamp(10px, 3vw, 16px)',
       position: 'relative'
     }}>
       <div style={{
@@ -160,26 +160,26 @@ export default function Login() {
         backdropFilter: 'blur(20px)',
         border: '1px solid var(--border-medium)',
         borderRadius: 'var(--radius-xl)',
-        padding: '36px 30px',
+        padding: 'clamp(22px, 6vw, 36px) clamp(16px, 5vw, 30px)',
         boxShadow: '0 24px 60px rgba(0,0,0,0.7), 0 0 35px rgba(16, 185, 129, 0.15)',
         position: 'relative',
         zIndex: 10
       }}>
         {/* Brand Header — PRD Requirement 1 */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             display: 'inline-flex',
-            padding: '14px',
+            padding: '12px',
             background: 'rgba(16, 185, 129, 0.12)',
             borderRadius: '50%',
             border: '2px solid rgba(16, 185, 129, 0.35)',
-            marginBottom: '14px',
+            marginBottom: '12px',
             boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)'
           }}>
-            <img src="/favicon.svg" alt="AgriTwin" style={{ width: '48px', height: '48px' }} />
+            <img src="/favicon.svg" alt="AgriTwin" style={{ width: '42px', height: '42px' }} />
           </div>
 
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <h1 style={{ fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <span>🌱</span> AgriTwin
           </h1>
           <p style={{ color: 'var(--emerald-400)', fontSize: '0.96rem', fontWeight: 700, marginTop: '3px' }}>

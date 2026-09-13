@@ -105,7 +105,7 @@ export default function TelemetryChart({
   };
 
   return (
-    <div style={{ height: `${height}px`, width: '100%' }}>
+    <div style={{ height: `${height}px`, maxHeight: '45vh', minHeight: '180px', width: '100%', position: 'relative' }}>
       <Line data={chartData} options={options} />
     </div>
   );

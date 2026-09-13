@@ -65,7 +65,27 @@ export default function DynamicDigitalTwin({ height = 540 }) {
     controls.minDistance = 6;
     controls.maxDistance = 32;
     controls.target.set(0, 0, 0);
+    controls.enablePan = true;
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN
+    };
     controlsRef.current = controls;
+
+    // Automatic responsive resize handler (PRD Section 9)
+    const handleResize = () => {
+      if (!container || !renderer || !camera) return;
+      const newWidth = container.clientWidth || width;
+      const newHeight = container.clientHeight || height;
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(newWidth, newHeight);
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(container);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xe2fbe8, 0.9);
@@ -349,6 +369,7 @@ export default function DynamicDigitalTwin({ height = 540 }) {
     return () => {
       cancelAnimationFrame(animFrameId.current);
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      resizeObserver.disconnect();
       controls.dispose();
       renderer.dispose();
     };

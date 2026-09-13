@@ -269,19 +269,19 @@ export default function Alerts({ onNavigateToAnimal, onNavigateToPlant, onNaviga
                 key={alert.id}
                 className="glass-card"
                 style={{
-                  padding: '18px 22px',
+                  padding: 'clamp(14px, 3.5vw, 18px) clamp(12px, 3.5vw, 22px)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   justifyContent: 'space-between',
-                  gap: '18px',
+                  gap: '14px',
                   flexWrap: 'wrap',
                   borderLeft: `4px solid ${isCritical ? '#ef4444' : alert.severity === 'WARNING' ? '#f59e0b' : '#38bdf8'}`,
                   opacity: alert.status === 'RESOLVED' ? 0.6 : 1,
                   background: alert.status === 'NEW' && isCritical ? 'rgba(35, 10, 14, 0.7)' : 'var(--bg-surface-card)'
                 }}
               >
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', flex: 1, minWidth: '280px' }}>
-                  <div style={{ marginTop: '2px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flex: '1 1 200px', minWidth: 0 }}>
+                  <div style={{ marginTop: '2px', flexShrink: 0 }}>
                     {alert.category === 'ANIMAL' ? (
                       <ShieldAlert size={22} color="#ef4444" />
                     ) : alert.category === 'PEST' ? (
@@ -293,7 +293,7 @@ export default function Alerts({ onNavigateToAnimal, onNavigateToPlant, onNaviga
                     )}
                   </div>
 
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
                       {/* Status Tag */}
                       <span style={{
@@ -352,7 +352,7 @@ export default function Alerts({ onNavigateToAnimal, onNavigateToPlant, onNaviga
                 </div>
 
                 {/* Right Action Buttons */}
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', flexShrink: 0 }}>
                   {alert.category === 'ANIMAL' && onNavigateToAnimal && (
                     <button
                       onClick={onNavigateToAnimal}

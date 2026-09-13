@@ -446,7 +446,7 @@ export default function AnimalAlertsPage({ onNavigateTo3D }) {
           Chronological audit trail of edge computer vision detections, species classification, and deterrent actions taken.
         </p>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-desktop-view" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-medium)', textAlign: 'left', color: 'var(--emerald-400)', fontSize: '0.74rem', textTransform: 'uppercase' }}>
@@ -496,6 +496,48 @@ export default function AnimalAlertsPage({ onNavigateTo3D }) {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Log Card List (< 768px) */}
+        <div className="table-mobile-card-view">
+          {intrusionLogs.map(log => (
+            <div
+              key={log.id}
+              style={{
+                background: log.status === 'ACTIVE' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                border: `1px solid ${log.status === 'ACTIVE' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.08)'}`,
+                borderRadius: 'var(--radius-md)',
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ color: '#fff', fontSize: '0.94rem' }}>{log.species}</strong>
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '8px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  background: log.status === 'ACTIVE' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.15)',
+                  color: log.status === 'ACTIVE' ? '#f87171' : '#34d399'
+                }}>
+                  {log.status}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+                <span>📍 {log.zone}</span>
+                <span style={{ color: 'var(--emerald-400)' }}>Conf: {log.confidence}%</span>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                {log.action}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', marginTop: '2px' }}>
+                ⏱ {log.time}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

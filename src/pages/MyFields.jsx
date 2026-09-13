@@ -48,7 +48,7 @@ export default function MyFields({ setTab, onOpenAddField }) {
         </div>
       ) : (
         /* Fields List Grid — PRD Section 16 */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '22px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
           {fields.map(field => {
             const isActive = field.id === activeFieldId;
 

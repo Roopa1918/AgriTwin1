@@ -41,56 +41,76 @@ export default function WeatherPage() {
       </div>
 
       {/* "Now" Current Weather Big Cards (PRD Section 17) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+      <div className="weather-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '14px' }}>
         {/* Current Condition Card */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '3rem' }}>{liveWeather.conditionIcon}</span>
+        <div className="glass-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <span style={{ fontSize: 'clamp(2.2rem, 6vw, 3rem)' }}>{liveWeather.conditionIcon}</span>
           <div>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Condition</span>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>{liveWeather.condition}</div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
+            <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Condition</span>
+            <div style={{ fontSize: 'clamp(1.15rem, 4vw, 1.4rem)', fontWeight: 800, color: '#fff' }}>{liveWeather.condition}</div>
+            <span style={{ fontSize: '0.7rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
           </div>
         </div>
 
         {/* Temperature */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Field Temperature</span>
-          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
-            {liveWeather.temperature}°C
+        <div className="metric-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)' }}>
+          <span className="metric-card-label">Field Temperature</span>
+          <div className="metric-card-value-row">
+            <span className="metric-card-value" style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.2rem)' }}>
+              {liveWeather.temperature}°
+            </span>
+            <span className="metric-card-unit">C</span>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
+          <div className="metric-card-footer">
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.7rem' }}>🟢 LIVE</span>
+          </div>
         </div>
 
         {/* Air Moisture */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Air Moisture</span>
-          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
-            {liveWeather.humidity}%
+        <div className="metric-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)' }}>
+          <span className="metric-card-label">Air Moisture</span>
+          <div className="metric-card-value-row">
+            <span className="metric-card-value" style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.2rem)' }}>
+              {liveWeather.humidity}
+            </span>
+            <span className="metric-card-unit">%</span>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
+          <div className="metric-card-footer">
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.7rem' }}>🟢 LIVE</span>
+          </div>
         </div>
 
         {/* Rain */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Precipitation</span>
-          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--color-water)', margin: '4px 0' }}>
-            {liveWeather.rainfall} mm
+        <div className="metric-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)' }}>
+          <span className="metric-card-label">Precipitation</span>
+          <div className="metric-card-value-row">
+            <span className="metric-card-value" style={{ color: 'var(--color-water)', fontSize: 'clamp(1.5rem, 5.5vw, 2.2rem)' }}>
+              {liveWeather.rainfall}
+            </span>
+            <span className="metric-card-unit">mm</span>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
+          <div className="metric-card-footer">
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.7rem' }}>🟢 LIVE</span>
+          </div>
         </div>
 
         {/* Wind */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Wind Speed</span>
-          <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
-            {liveWeather.windSpeed} km/h
+        <div className="metric-card" style={{ padding: 'clamp(14px, 3.5vw, 22px)' }}>
+          <span className="metric-card-label">Wind Speed</span>
+          <div className="metric-card-value-row">
+            <span className="metric-card-value" style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.2rem)' }}>
+              {liveWeather.windSpeed}
+            </span>
+            <span className="metric-card-unit">km/h</span>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)' }}>🟢 LIVE WEATHER</span>
+          <div className="metric-card-footer">
+            <span style={{ color: '#34d399', fontWeight: 700, fontSize: '0.7rem' }}>🟢 LIVE</span>
+          </div>
         </div>
       </div>
 
       {/* Today's Hourly Forecast (PRD Section 17) */}
-      <div className="glass-card">
+      <div className="glass-card" style={{ overflow: 'hidden' }}>
         <div className="glass-card-header">
           <div className="glass-card-title">
             <Clock size={18} color="var(--emerald-400)" />
@@ -99,24 +119,32 @@ export default function WeatherPage() {
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Next 8 Hours</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '12px' }}>
+        <div style={{
+          display: 'flex',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          gap: '12px',
+          paddingBottom: '8px'
+        }}>
           {liveWeather.hourly.map((h, idx) => (
             <div 
               key={idx}
               style={{
                 background: 'rgba(0,0,0,0.3)',
                 borderRadius: 'var(--radius-md)',
-                padding: '14px 10px',
+                padding: '12px 10px',
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                minWidth: '94px',
+                flexShrink: 0
               }}
             >
               <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 600 }}>{h.time}</span>
-              <span style={{ fontSize: '1.8rem' }}>{h.icon}</span>
-              <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{h.temp}°C</strong>
+              <span style={{ fontSize: '1.7rem' }}>{h.icon}</span>
+              <strong style={{ fontSize: '1.05rem', color: '#fff' }}>{h.temp}°C</strong>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>💧 {h.humidity}%</span>
               {h.rain > 0 && <span style={{ fontSize: '0.72rem', color: 'var(--color-water)' }}>🌧 {h.rain}mm</span>}
             </div>
@@ -134,7 +162,7 @@ export default function WeatherPage() {
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Daily Weather Prediction</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '12px' }}>
           {liveWeather.daily.map((d, idx) => (
             <div
               key={idx}

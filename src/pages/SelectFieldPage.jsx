@@ -403,49 +403,53 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
           {/* Top Search & Live Location Bar — PRD Section 7, 8, 10 */}
           <div style={{
             position: 'absolute',
-            top: '16px',
+            top: '12px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '94%',
+            width: '96%',
             maxWidth: '720px',
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
             gap: '8px'
           }}>
-            <div style={{
-              display: 'flex',
-              gap: '10px',
-              background: 'rgba(7, 20, 14, 0.95)',
-              backdropFilter: 'blur(16px)',
-              padding: '8px',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px solid var(--border-medium)',
-              boxShadow: '0 12px 36px rgba(0,0,0,0.6)'
-            }}>
+            <div 
+              className="map-search-bar-row"
+              style={{
+                display: 'flex',
+                gap: '8px',
+                background: 'rgba(7, 20, 14, 0.95)',
+                backdropFilter: 'blur(16px)',
+                padding: '6px 8px',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--border-medium)',
+                boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
+                flexWrap: 'wrap'
+              }}
+            >
               {/* Search Bar Input */}
-              <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <Search size={18} color="var(--emerald-400)" style={{ position: 'absolute', left: '14px' }} />
+              <div style={{ flex: '1 1 200px', position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                <Search size={18} color="var(--emerald-400)" style={{ position: 'absolute', left: '12px' }} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="🔎 Search your field location (Village, Town, PIN code)..."
+                  placeholder="🔎 Search field location..."
                   style={{
                     width: '100%',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-lg)',
-                    padding: '12px 38px 12px 42px',
+                    padding: '10px 34px 10px 38px',
                     color: '#fff',
-                    fontSize: '0.94rem',
+                    fontSize: '0.9rem',
                     outline: 'none'
                   }}
                 />
                 {searchQuery && (
                   <button
                     onClick={() => { setSearchQuery(''); setSearchResults([]); }}
-                    style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
+                    style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', minHeight: '32px', minWidth: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <X size={16} />
                   </button>
@@ -458,18 +462,21 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                 disabled={locationLoading}
                 className="btn btn-secondary"
                 style={{
-                  padding: '0 18px',
+                  minHeight: '42px',
+                  padding: '0 14px',
                   whiteSpace: 'nowrap',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  justifyContent: 'center',
+                  gap: '6px',
                   fontWeight: 700,
-                  fontSize: '0.9rem',
-                  borderColor: 'rgba(52, 211, 153, 0.4)'
+                  fontSize: '0.86rem',
+                  borderColor: 'rgba(52, 211, 153, 0.4)',
+                  flexShrink: 0
                 }}
               >
-                <Navigation size={16} color="var(--emerald-400)" />
-                <span>{locationLoading ? 'Finding location...' : '📍 Use My Live Location'}</span>
+                <Navigation size={15} color="var(--emerald-400)" />
+                <span>{locationLoading ? 'Finding...' : '📍 Use Live GPS'}</span>
               </button>
             </div>
 
@@ -533,6 +540,7 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                 {searchResults.map((item) => (
                   <div
                     key={item.id}
+                    className="search-result-card"
                     style={{
                       background: 'rgba(255, 255, 255, 0.03)',
                       border: '1px solid rgba(255, 255, 255, 0.07)',
@@ -541,7 +549,8 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '14px',
+                      gap: '12px',
+                      flexWrap: 'wrap',
                       transition: 'all 0.2s'
                     }}
                     onMouseEnter={(e) => {
@@ -553,7 +562,7 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                       e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: '1 1 200px', minWidth: 0 }}>
                       <div style={{
                         background: 'rgba(16, 185, 129, 0.2)',
                         borderRadius: '50%',
@@ -596,14 +605,13 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                           )}
                         </div>
                         <div style={{
-                          fontSize: '0.78rem',
+                          fontSize: '0.8rem',
                           color: 'var(--text-muted)',
-                          marginTop: '3px',
-                          lineHeight: 1.35,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }} title={item.displayName}>
+                          marginTop: '4px',
+                          lineHeight: 1.4,
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word'
+                        }}>
                           {item.displayName}
                         </div>
                       </div>
@@ -613,13 +621,15 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                       onClick={() => handleSelectSearchResult(item)}
                       className="btn btn-primary btn-sm"
                       style={{
-                        flexShrink: 0,
-                        padding: '7px 14px',
-                        fontSize: '0.8rem',
+                        minHeight: '40px',
+                        padding: '8px 14px',
+                        fontSize: '0.82rem',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px'
+                        justifyContent: 'center',
+                        gap: '6px',
+                        flexShrink: 0
                       }}
                     >
                       <span>Select Location</span>
@@ -654,53 +664,54 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
             style={{ 
               flex: 1, 
               width: '100%', 
-              height: 'calc(100vh - 170px)', 
-              minHeight: '480px' 
+              height: 'calc(100vh - 140px)', 
+              minHeight: '380px' 
             }} 
           />
 
           {/* Bottom Action / Boundary Drawer Bar — PRD Section 12 & 24 */}
           <div style={{
             position: 'absolute',
-            bottom: '20px',
+            bottom: '16px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '92%',
+            width: '94%',
             maxWidth: '680px',
             zIndex: 1000,
             background: 'rgba(8, 22, 15, 0.96)',
             backdropFilter: 'blur(16px)',
             border: '1px solid var(--border-medium)',
             borderRadius: 'var(--radius-xl)',
-            padding: '16px 20px',
+            padding: '14px 16px',
             boxShadow: '0 16px 50px rgba(0,0,0,0.7)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: '10px'
           }}>
             {/* Mode Switcher: Pan & Move vs Draw Boundary */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={() => setInteractionMode('pan')}
                 style={{
                   flex: 1,
-                  padding: '8px 12px',
+                  minHeight: '44px',
+                  padding: '8px 10px',
                   borderRadius: 'var(--radius-md)',
                   background: interactionMode === 'pan' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
                   border: interactionMode === 'pan' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
                   color: interactionMode === 'pan' ? '#34d399' : 'var(--text-muted)',
                   fontWeight: 800,
-                  fontSize: '0.84rem',
+                  fontSize: '0.82rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '4px',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
               >
-                <span>✋ Pan / Move Map</span>
+                <span>✋ Move Map</span>
               </button>
 
               <button
@@ -708,17 +719,18 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                 onClick={() => setInteractionMode('draw')}
                 style={{
                   flex: 1,
-                  padding: '8px 12px',
+                  minHeight: '44px',
+                  padding: '8px 10px',
                   borderRadius: 'var(--radius-md)',
                   background: interactionMode === 'draw' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
                   border: interactionMode === 'draw' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
                   color: interactionMode === 'draw' ? '#34d399' : 'var(--text-muted)',
                   fontWeight: 800,
-                  fontSize: '0.84rem',
+                  fontSize: '0.82rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '4px',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
@@ -735,7 +747,7 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                 }}
                 className="btn btn-secondary btn-sm"
                 title="Re-center on selected field pin"
-                style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+                style={{ minHeight: '44px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
               >
                 <span>🎯 Center</span>
               </button>

@@ -284,10 +284,10 @@ export default function AddFieldModal({ isOpen, onClose }) {
         maxHeight: '92vh',
         overflowY: 'auto',
         boxShadow: 'var(--shadow-lg)',
-        padding: '24px',
+        padding: 'clamp(14px, 4vw, 24px)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '18px'
+        gap: '16px'
       }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
@@ -295,13 +295,13 @@ export default function AddFieldModal({ isOpen, onClose }) {
             <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 700 }}>
               Step {step} of 3
             </span>
-            <h2 style={{ fontSize: '1.35rem', color: '#fff', fontWeight: 800 }}>
+            <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>
               {step === 1 && '🌾 Select Your Field'}
               {step === 2 && 'Tell us about your field 🌱'}
               {step === 3 && 'Field Created Successfully! 🎉'}
             </h2>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', minHeight: '36px', minWidth: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <X size={20} />
           </button>
         </div>
@@ -310,14 +310,14 @@ export default function AddFieldModal({ isOpen, onClose }) {
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Search Bar & Live Location Controls */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 180px', position: 'relative', minWidth: 0 }}>
                 <Search size={16} color="var(--emerald-400)" style={{ position: 'absolute', left: '12px', top: '13px' }} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="🔎 Search location (Village, Town, PIN)..."
+                  placeholder="🔎 Search location..."
                   style={{
                     width: '100%',
                     background: 'rgba(5, 14, 10, 0.85)',
@@ -334,10 +334,10 @@ export default function AddFieldModal({ isOpen, onClose }) {
                 onClick={handleUseMyLocation}
                 disabled={locationLoading}
                 className="btn btn-secondary btn-sm"
-                style={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ minHeight: '42px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}
               >
                 <Navigation size={14} color="var(--emerald-400)" />
-                <span>{locationLoading ? 'Finding...' : '📍 Use Live Location'}</span>
+                <span>{locationLoading ? 'Finding...' : '📍 Use Live GPS'}</span>
               </button>
             </div>
 

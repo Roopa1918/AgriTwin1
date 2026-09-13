@@ -320,8 +320,8 @@ export default function PlantHealthPage({ onNavigateToAlerts }) {
       {/* Main Content Layout: Grid (Left) + Detail Drawer (Right) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-        gap: '24px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+        gap: '20px',
         alignItems: 'start'
       }}>
         {/* Left Column: 2D Interactive Grid */}

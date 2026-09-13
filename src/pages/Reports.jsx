@@ -27,9 +27,9 @@ export default function Reports() {
       </div>
 
       {/* Printable Sheet */}
-      <div className="glass-card" style={{ padding: '36px', background: '#0a1a13' }}>
+      <div className="glass-card" style={{ padding: 'clamp(14px, 4vw, 36px)', background: '#0a1a13' }}>
         {/* Top Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid var(--border-medium)', paddingBottom: '18px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', borderBottom: '2px solid var(--border-medium)', paddingBottom: '18px', marginBottom: '20px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span style={{ fontSize: '1.8rem' }}>🌱</span>
