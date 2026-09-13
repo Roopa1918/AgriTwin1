@@ -1,83 +1,100 @@
-// AgriTwin — Interactive Field Selection & Creation Wizard (PRD Section 5 & 26)
+// AgriTwin — Add Field Modal Wizard
+// Supports Search Location, Use My Live Location, Map Boundary Drawing, and Area Calculation.
+
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { useFields, CROP_OPTIONS } from '../../context/FieldsContext';
-import { MapPin, Navigation, X, CheckCircle2, Layers, Crop, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { searchLocations, reverseGeocode, calculatePolygonAcres } from '../../services/geocodingService';
+import { 
+  Search, 
+  MapPin, 
+  Navigation, 
+  Layers, 
+  CheckCircle2, 
+  X, 
+  ArrowRight, 
+  ArrowLeft, 
+  Sparkles, 
+  RotateCcw,
+  AlertCircle
+} from 'lucide-react';
 
 export default function AddFieldModal({ isOpen, onClose }) {
   const { addField } = useFields();
-  const [step, setStep] = useState(1); // 1: Map selection, 2: Name & Crop, 3: Success
+  const { user } = useAuth();
+
+  const [step, setStep] = useState(1); // 1: Map & Boundary, 2: Name & Crop, 3: Success
+
+  // Search & Map State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [activeLayer, setActiveLayer] = useState('satellite');
+
+  const [fieldCenter, setFieldCenter] = useState({ lat: 12.5234, lng: 76.8971 });
+  const [boundaryPoints, setBoundaryPoints] = useState([]);
+  const [calculatedArea, setCalculatedArea] = useState(0);
+  const [villageName, setVillageName] = useState('Selected Field Location');
 
   // Form State
-  const [fieldName, setFieldName] = useState('My New Field');
-  const [selectedCrop, setSelectedCrop] = useState('Tomato');
+  const [fieldName, setFieldName] = useState('My Rice Field');
+  const [selectedCrop, setSelectedCrop] = useState('Rice');
   const [customCrop, setCustomCrop] = useState('');
-  const [fieldArea, setFieldArea] = useState('2.5 Acres');
-  const [selectedCoords, setSelectedCoords] = useState({ lat: 11.0168, lng: 76.9558 });
-  const [drawnBoundary, setDrawnBoundary] = useState([]);
-  const [locationLoading, setLocationLoading] = useState(false);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const markerRef = useRef(null);
-  const polygonRef = useRef(null);
+  const polygonLayerRef = useRef(null);
+  const markerLayerRef = useRef(null);
+  const tileLayerRef = useRef(null);
 
-  // Initialize Leaflet Map when step 1 is visible
+  // Debounced search
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const results = await searchLocations(searchQuery);
+      setSearchResults(results);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Leaflet Map Init
   useEffect(() => {
     if (!isOpen || step !== 1 || !mapContainerRef.current) return;
 
-    // Destroy prior map instance if any
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
     }
 
     const map = L.map(mapContainerRef.current, {
-      center: [selectedCoords.lat, selectedCoords.lng],
+      center: [fieldCenter.lat, fieldCenter.lng],
       zoom: 15,
       zoomControl: true
     });
     mapInstanceRef.current = map;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(map);
+    applyTileLayer(map, activeLayer);
+    updateMarker(map, fieldCenter.lat, fieldCenter.lng);
 
-    // Initial marker
-    const markerIcon = L.divIcon({
-      className: 'custom-pin',
-      html: `<div style="background: #10b981; border: 3px solid #fff; border-radius: 50%; width: 26px; height: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);"></div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
-    });
-
-    const marker = L.marker([selectedCoords.lat, selectedCoords.lng], { icon: markerIcon }).addTo(map);
-    markerRef.current = marker;
-
-    // Handle map clicks to place field or draw boundary
     map.on('click', (e) => {
       const { lat, lng } = e.latlng;
-      setSelectedCoords({ lat, lng });
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng]);
-      }
+      setFieldCenter({ lat, lng });
 
-      // Add to boundary points
-      setDrawnBoundary(prev => {
+      setBoundaryPoints((prev) => {
         const nextPts = [...prev, [lat, lng]];
-        if (polygonRef.current) {
-          map.removeLayer(polygonRef.current);
-        }
-        if (nextPts.length >= 3) {
-          polygonRef.current = L.polygon(nextPts, {
-            color: '#10b981',
-            fillColor: '#10b981',
-            fillOpacity: 0.3
-          }).addTo(map);
-        }
+        renderPolygon(map, nextPts);
+        setCalculatedArea(calculatePolygonAcres(nextPts));
         return nextPts;
       });
+
+      reverseGeocode(lat, lng).then(name => setVillageName(name));
     });
 
     return () => {
@@ -88,42 +105,111 @@ export default function AddFieldModal({ isOpen, onClose }) {
     };
   }, [isOpen, step]);
 
-  // Use My Location Feature (PRD Section 27)
+  const applyTileLayer = (map, type) => {
+    if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
+    if (type === 'satellite') {
+      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 19
+      }).addTo(map);
+    } else {
+      tileLayerRef.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 19
+      }).addTo(map);
+    }
+  };
+
+  const updateMarker = (map, lat, lng) => {
+    if (markerLayerRef.current) map.removeLayer(markerLayerRef.current);
+    const pinIcon = L.divIcon({
+      className: 'custom-pin',
+      html: `<div style="background: #10b981; border: 3px solid #fff; border-radius: 50%; width: 24px; height: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+    markerLayerRef.current = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
+  };
+
+  const renderPolygon = (map, points) => {
+    if (polygonLayerRef.current) {
+      map.removeLayer(polygonLayerRef.current);
+      polygonLayerRef.current = null;
+    }
+    if (points.length >= 3) {
+      polygonLayerRef.current = L.polygon(points, {
+        color: '#10b981',
+        weight: 3,
+        fillColor: '#10b981',
+        fillOpacity: 0.35,
+        dashArray: '4, 4'
+      }).addTo(map);
+    }
+  };
+
+  const handleSelectSearchResult = (res) => {
+    setSearchQuery(res.name);
+    setSearchResults([]);
+    setVillageName(res.name);
+    setFieldCenter({ lat: res.lat, lng: res.lng });
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([res.lat, res.lng], 16);
+      updateMarker(mapInstanceRef.current, res.lat, res.lng);
+    }
+  };
+
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
+      setLocationError("Geolocation is not supported by your browser.");
       return;
     }
     setLocationLoading(true);
+    setLocationError('');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setSelectedCoords({ lat: latitude, lng: longitude });
+        setFieldCenter({ lat: latitude, lng: longitude });
         setLocationLoading(false);
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.setView([latitude, longitude], 16);
-          if (markerRef.current) {
-            markerRef.current.setLatLng([latitude, longitude]);
-          }
+          mapInstanceRef.current.flyTo([latitude, longitude], 16);
+          updateMarker(mapInstanceRef.current, latitude, longitude);
         }
+        reverseGeocode(latitude, longitude).then(name => setVillageName(name));
       },
       (err) => {
         setLocationLoading(false);
-        alert('Could not access your location. You can tap anywhere on the map to choose your field.');
+        setLocationError("We couldn't access your location. You can search for your field instead.");
       }
     );
   };
 
   const handleFinish = () => {
     const finalCrop = selectedCrop === 'Other' && customCrop.trim() ? customCrop.trim() : selectedCrop;
+    const finalArea = calculatedArea > 0 ? `${calculatedArea} Acres` : '2.0 Acres';
+
+    let poly = boundaryPoints;
+    if (poly.length < 3) {
+      const lat = fieldCenter.lat;
+      const lng = fieldCenter.lng;
+      poly = [
+        [lat + 0.0012, lng - 0.0012],
+        [lat + 0.0012, lng + 0.0012],
+        [lat - 0.0012, lng + 0.0012],
+        [lat - 0.0012, lng - 0.0012]
+      ];
+    }
+
     addField({
-      name: fieldName,
+      userId: user?.uid || 'user-default',
+      name: fieldName.trim() || 'My Farm Field',
       crop: finalCrop,
-      latitude: selectedCoords.lat,
-      longitude: selectedCoords.lng,
-      area: fieldArea,
-      boundary: drawnBoundary.length >= 3 ? drawnBoundary : null
+      latitude: fieldCenter.lat,
+      longitude: fieldCenter.lng,
+      area: finalArea,
+      boundary: poly,
+      village: villageName
     });
+
     setStep(3);
   };
 
@@ -133,38 +219,38 @@ export default function AddFieldModal({ isOpen, onClose }) {
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(5, 15, 10, 0.85)',
-      backdropFilter: 'blur(10px)',
-      zIndex: 200,
+      background: 'rgba(4, 12, 8, 0.88)',
+      backdropFilter: 'blur(12px)',
+      zIndex: 2000,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '16px'
     }}>
       <div style={{
-        background: '#0c1e17',
+        background: '#091c14',
         border: '1px solid var(--border-medium)',
         borderRadius: 'var(--radius-xl)',
         width: '100%',
-        maxWidth: '640px',
-        maxHeight: '90vh',
+        maxWidth: '700px',
+        maxHeight: '92vh',
         overflowY: 'auto',
         boxShadow: 'var(--shadow-lg)',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '18px'
       }}>
-        {/* Modal Header */}
+        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
           <div>
-            <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 700 }}>
               Step {step} of 3
             </span>
-            <h2 style={{ fontSize: '1.3rem', color: '#fff' }}>
-              {step === 1 && 'Where is your field? 🌾'}
-              {step === 2 && 'Name your field & crop 🌱'}
-              {step === 3 && 'Your field is ready! 🎉'}
+            <h2 style={{ fontSize: '1.35rem', color: '#fff', fontWeight: 800 }}>
+              {step === 1 && '🌾 Select Your Field'}
+              {step === 2 && 'Tell us about your field 🌱'}
+              {step === 3 && 'Field Created Successfully! 🎉'}
             </h2>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -172,88 +258,150 @@ export default function AddFieldModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* STEP 1: Interactive Map Selection */}
+        {/* STEP 1: Search & Boundary Selection */}
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)' }}>
-              Tap anywhere on the map to place your agricultural field. You can tap multiple times to outline your field boundary.
-            </p>
+            {/* Search Bar & Live Location Controls */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <Search size={16} color="var(--emerald-400)" style={{ position: 'absolute', left: '12px', top: '13px' }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="🔎 Search location (Village, Town, PIN)..."
+                  style={{
+                    width: '100%',
+                    background: 'rgba(5, 14, 10, 0.85)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '10px 14px 10px 36px',
+                    color: '#fff',
+                    fontSize: '0.88rem'
+                  }}
+                />
+              </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
+              <button
                 onClick={handleUseMyLocation}
                 disabled={locationLoading}
                 className="btn btn-secondary btn-sm"
-                style={{ flex: 1 }}
+                style={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Navigation size={14} color="var(--emerald-400)" />
-                <span>{locationLoading ? 'Finding location...' : 'Use My Current Location'}</span>
+                <span>{locationLoading ? 'Finding...' : '📍 Use Live Location'}</span>
               </button>
-
-              {drawnBoundary.length > 0 && (
-                <button 
-                  onClick={() => setDrawnBoundary([])}
-                  className="btn btn-secondary btn-sm"
-                >
-                  Reset Boundary Points ({drawnBoundary.length})
-                </button>
-              )}
             </div>
 
+            {/* Search Suggestions */}
+            {searchResults.length > 0 && (
+              <div style={{
+                background: '#0c2219',
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-md)',
+                maxHeight: '160px',
+                overflowY: 'auto'
+              }}>
+                {searchResults.map(s => (
+                  <div
+                    key={s.id}
+                    onClick={() => handleSelectSearchResult(s)}
+                    style={{
+                      padding: '8px 14px',
+                      fontSize: '0.85rem',
+                      borderBottom: '1px solid rgba(255,255,255,0.05)',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.15)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <strong>{s.name}</strong> <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>({s.displayName})</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {locationError && (
+              <div style={{ color: '#fca5a5', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertCircle size={14} /> {locationError}
+              </div>
+            )}
+
             {/* Map Container */}
-            <div 
+            <div
               ref={mapContainerRef}
               style={{
                 width: '100%',
-                height: '340px',
+                height: '320px',
                 borderRadius: 'var(--radius-lg)',
                 overflow: 'hidden',
                 border: '1px solid var(--border-subtle)'
               }}
             />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-              <span>Selected Coordinates: <strong>{selectedCoords.lat.toFixed(4)}°N, {selectedCoords.lng.toFixed(4)}°E</strong></span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+              <span style={{ color: 'var(--text-muted)' }}>
+                {boundaryPoints.length >= 3 
+                  ? `✓ ${boundaryPoints.length} points selected (${calculatedArea} acres)` 
+                  : 'Tap points on the map to draw your field boundary'}
+              </span>
+
+              {boundaryPoints.length > 0 && (
+                <button
+                  onClick={() => {
+                    setBoundaryPoints([]);
+                    setCalculatedArea(0);
+                    if (mapInstanceRef.current && polygonLayerRef.current) {
+                      mapInstanceRef.current.removeLayer(polygonLayerRef.current);
+                      polygonLayerRef.current = null;
+                    }
+                  }}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <RotateCcw size={13} />
+                  <span>Redraw</span>
+                </button>
+              )}
             </div>
 
-            <button 
+            <button
               onClick={() => setStep(2)}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '12px' }}
+              style={{ width: '100%', padding: '12px', fontWeight: 700 }}
             >
-              <span>Continue: Name Field</span>
+              <span>✓ Use This Field & Continue</span>
               <ArrowRight size={16} />
             </button>
           </div>
         )}
 
-        {/* STEP 2: Name & Crop Selection */}
+        {/* STEP 2: Name & Crop */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.86rem', color: '#fff', fontWeight: 700, marginBottom: '6px' }}>
                 What should we call this field?
               </label>
               <input
                 type="text"
                 value={fieldName}
                 onChange={(e) => setFieldName(e.target.value)}
-                placeholder="e.g. Tomato Field, North Rice Plot"
+                placeholder="e.g. My Rice Field, East Maize Plot"
                 style={{
                   width: '100%',
-                  background: 'rgba(5, 13, 10, 0.8)',
+                  background: 'rgba(5, 14, 10, 0.85)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '12px',
+                  padding: '11px 14px',
                   color: '#fff',
-                  fontSize: '0.95rem',
-                  fontFamily: 'inherit'
+                  fontSize: '0.94rem'
                 }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '0.86rem', color: '#fff', fontWeight: 700, marginBottom: '8px' }}>
                 What crop are you growing?
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px' }}>
@@ -263,13 +411,13 @@ export default function AddFieldModal({ isOpen, onClose }) {
                     type="button"
                     onClick={() => setSelectedCrop(c.id)}
                     style={{
-                      background: selectedCrop === c.id ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0,0,0,0.3)',
+                      background: selectedCrop === c.id ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0,0,0,0.3)',
                       border: `1px solid ${selectedCrop === c.id ? 'var(--emerald-400)' : 'rgba(255,255,255,0.08)'}`,
                       borderRadius: 'var(--radius-md)',
-                      padding: '10px 8px',
+                      padding: '9px 8px',
                       color: selectedCrop === c.id ? '#fff' : 'var(--text-muted)',
                       fontSize: '0.82rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -289,79 +437,46 @@ export default function AddFieldModal({ isOpen, onClose }) {
                   onChange={(e) => setCustomCrop(e.target.value)}
                   style={{
                     width: '100%',
-                    background: 'rgba(5, 13, 10, 0.8)',
+                    background: 'rgba(5, 14, 10, 0.85)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
-                    padding: '10px',
+                    padding: '10px 14px',
                     color: '#fff',
                     marginTop: '8px',
-                    fontSize: '0.88rem'
+                    fontSize: '0.9rem'
                   }}
                 />
               )}
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '6px' }}>
-                Estimated Field Area
-              </label>
-              <input
-                type="text"
-                value={fieldArea}
-                onChange={(e) => setFieldArea(e.target.value)}
-                placeholder="e.g. 2.5 Acres or 1.0 Hectare"
-                style={{
-                  width: '100%',
-                  background: 'rgba(5, 13, 10, 0.8)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px',
-                  color: '#fff',
-                  fontSize: '0.9rem'
-                }}
-              />
-            </div>
-
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-              <button 
-                onClick={() => setStep(1)}
-                className="btn btn-secondary"
-                style={{ flex: 1 }}
-              >
+              <button onClick={() => setStep(1)} className="btn btn-secondary" style={{ flex: 1 }}>
                 <ArrowLeft size={16} /> Back to Map
               </button>
-              <button 
-                onClick={handleFinish}
-                className="btn btn-primary"
-                style={{ flex: 2 }}
-              >
-                <span>Create Digital Twin</span>
+              <button onClick={handleFinish} className="btn btn-primary" style={{ flex: 2, fontWeight: 700 }}>
+                <span>🌱 Create My Field</span>
                 <Sparkles size={16} />
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Ready & Success Confirmation */}
+        {/* STEP 3: Success Confirmation */}
         {step === 3 && (
-          <div style={{ textAlign: 'center', padding: '20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', border: '2px solid var(--emerald-400)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle2 size={36} color="var(--emerald-400)" />
+          <div style={{ textAlign: 'center', padding: '16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', border: '2px solid var(--emerald-400)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CheckCircle2 size={34} color="var(--emerald-400)" />
             </div>
 
-            <h3 style={{ fontSize: '1.4rem', color: '#fff' }}>
-              {fieldName} is now being monitored! 🌱
+            <h3 style={{ fontSize: '1.35rem', color: '#fff', fontWeight: 800 }}>
+              {fieldName} is now active! 🌱
             </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '420px', lineHeight: 1.5 }}>
-              AgriTwin has created a 4-zone Digital Twin for your field. Real live weather is now streaming for your location.
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '440px', lineHeight: 1.5 }}>
+              Your digital twin has been generated. Live weather for {villageName} is now connected.
             </p>
 
-            <button
-              onClick={onClose}
-              className="btn btn-primary"
-              style={{ padding: '12px 28px', fontSize: '1rem', marginTop: '10px' }}
-            >
-              Start Monitoring Field
+            <button onClick={onClose} className="btn btn-primary" style={{ padding: '11px 28px', fontSize: '0.95rem', fontWeight: 700, marginTop: '8px' }}>
+              Open Field Dashboard
             </button>
           </div>
         )}

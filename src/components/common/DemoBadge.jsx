@@ -13,7 +13,7 @@ export function DemoBanner() {
         <span style={{ fontWeight: 600 }}>SIMULATED SENSOR DATA — DEMONSTRATION MODE</span>
       </div>
       <div style={{ display: 'none', mdDisplay: 'block', fontSize: '0.74rem', color: '#fef08a' }}>
-        Virtual campus IoT network running &bull; Ready for physical ESP32 gateway integration
+        Virtual IoT sensor network running &bull; Ready for physical ESP32 gateway integration
       </div>
     </div>
   );

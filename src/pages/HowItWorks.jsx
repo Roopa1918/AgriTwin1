@@ -40,7 +40,7 @@ export default function HowItWorks() {
         fontSize: '0.9rem'
       }}>
         <strong>Academic Demonstration Architecture: </strong>
-        Physical sensors are not currently installed on the campus field. The AgriTwin prototype 
+        Physical sensors are not currently installed on the selected field. The AgriTwin platform 
         uses an authentic, correlated sensor simulation engine to demonstrate the complete end-to-end 
         Digital Twin workflow. The data models and ingestion layer are engineered so that real ESP32 / IoT hardware 
         can be connected in the future without requiring major frontend changes.
@@ -113,7 +113,7 @@ export default function HowItWorks() {
                 <Radio size={16} color="#0284c7" /> 1. Physical Probe Network in Soil
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Decagon 10HS soil moisture probes, Sensirion SHT35 ambient weather stations, and tipping bucket rain gauges installed physically in campus field zones.
+                Decagon 10HS soil moisture probes, Sensirion SHT35 ambient weather stations, and tipping bucket rain gauges installed physically in active field zones.
               </p>
             </div>
 

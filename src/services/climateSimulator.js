@@ -9,7 +9,7 @@ export const CLIMATE_SCENARIOS = {
     tempDelta: 0,
     rainDeltaPercent: 0,
     humidityDeltaPercent: 0,
-    description: 'Current seasonal average conditions for the campus agro-ecological zone.',
+    description: 'Current seasonal average conditions for the active field agro-ecological zone.',
     color: '#10b981'
   },
   warmer: {

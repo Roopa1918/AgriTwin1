@@ -78,7 +78,7 @@ export default function Irrigation({ setTab }) {
         color: '#fde68a'
       }}>
         <strong>Safety Constraint Notice: </strong>
-        This simulation operates exclusively inside the digital environment and does NOT actuate physical campus valves or pumps.
+        This simulation operates exclusively inside the digital environment and does NOT actuate physical field valves or pumps.
       </div>
 
       {/* Irrigation Intelligence Table (PRD Section 30) */}

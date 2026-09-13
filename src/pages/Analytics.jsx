@@ -86,7 +86,7 @@ export default function Analytics() {
           <h1>Agronomic Analytics & Historical Telemetry</h1>
           <p>
             Longitudinal trend telemetry and multivariate environmental correlation analysis 
-            for the campus demonstration field.
+            for the active agricultural field.
           </p>
         </div>
 

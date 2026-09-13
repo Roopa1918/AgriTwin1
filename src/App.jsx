@@ -1,4 +1,8 @@
-// AgriTwin — Main Application Shell with Farmer-Friendly Navigation & Multi-Field Support
+// AgriTwin — Main Application Shell
+// Strictly adheres to PRD Sections 1, 6, 16, 17, 25, 26:
+// - First Screen: Always Login
+// - After Login: If 0 fields, opens "🌾 Select Your Field"
+// - Header: Displays Active Field, location, acreage, and prominent "Change Field" button.
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FieldsProvider, useFields } from './context/FieldsContext';
@@ -9,6 +13,7 @@ import AddFieldModal from './components/fields/AddFieldModal';
 
 // Pages
 import Login from './pages/Login';
+import SelectFieldPage from './pages/SelectFieldPage';
 import HomeDashboard from './pages/HomeDashboard';
 import MyFields from './pages/MyFields';
 import FieldMonitor from './pages/FieldMonitor';
@@ -21,17 +26,31 @@ import Reports from './pages/Reports';
 import RawSensorData from './pages/RawSensorData';
 import DemoControls from './pages/DemoControls';
 
-import { Menu, Plus, MapPin } from 'lucide-react';
+import { Plus, MapPin, Sparkles, LogOut, ChevronDown } from 'lucide-react';
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
-  const { activeField, fields, setActiveFieldId } = useFields();
+  const { isAuthenticated, logout, isDemo } = useAuth();
+  const { activeField, fields, setActiveFieldId, loadDemoField } = useFields();
   const [currentTab, setTab] = useState('home');
   const [isAddFieldOpen, setIsAddFieldOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSelectingField, setIsSelectingField] = useState(false);
 
+  // Requirement 1: When user opens AgriTwin, first screen must always be Login
   if (!isAuthenticated) {
     return <Login />;
+  }
+
+  // Requirement 6 & 25: For a new user (or user with 0 fields), show "Select Your Field"
+  if (fields.length === 0 || isSelectingField) {
+    return (
+      <SelectFieldPage
+        onCancel={fields.length > 0 ? () => setIsSelectingField(false) : null}
+        onFieldCreated={(newField) => {
+          setIsSelectingField(false);
+          setTab('home');
+        }}
+      />
+    );
   }
 
   const renderActiveTab = () => {
@@ -39,7 +58,7 @@ function AppContent() {
       case 'home':
         return <HomeDashboard setTab={setTab} />;
       case 'my-fields':
-        return <MyFields setTab={setTab} onOpenAddField={() => setIsAddFieldOpen(true)} />;
+        return <MyFields setTab={setTab} onOpenAddField={() => setIsSelectingField(true)} />;
       case 'field-monitor':
         return <FieldMonitor />;
       case 'weather':
@@ -68,58 +87,75 @@ function AppContent() {
       {/* Farmer Navigation Sidebar */}
       <SimpleNavbar
         currentTab={currentTab}
-        setTab={(tab) => { setTab(tab); setSidebarOpen(false); }}
-        onOpenAddField={() => setIsAddFieldOpen(true)}
+        setTab={setTab}
+        onOpenAddField={() => setIsSelectingField(true)}
       />
 
       {/* Main App Content Wrapper */}
       <div className="main-wrapper">
-        {/* Top Header with Active Field Quick Selector & Add Field Action */}
-        <header className="app-header">
+        {/* Top Header — PRD Section 17: Active Field Display & "Change Field" Button */}
+        <header className="app-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
+          {/* Active Field Details */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {/* Field Dropdown Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.4rem' }}>{activeField?.cropIcon || '🌾'}</span>
-              <div>
-                <select
-                  value={activeField?.id}
-                  onChange={(e) => setActiveFieldId(e.target.value)}
-                  style={{
-                    background: '#091c14',
-                    border: '1px solid var(--border-medium)',
-                    color: '#fff',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '6px 12px',
-                    fontSize: '0.92rem',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {fields.map(f => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} ({f.crop})
-                    </option>
-                  ))}
-                </select>
-                <div style={{ fontSize: '0.72rem', color: 'var(--emerald-400)', marginTop: '2px', marginLeft: '4px' }}>
-                  Active Digital Twin
-                </div>
+            <span style={{ fontSize: '1.9rem' }}>{activeField?.cropIcon || '🌾'}</span>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', margin: 0 }}>
+                  {activeField?.name}
+                </h2>
+                <span style={{
+                  fontSize: '0.74rem',
+                  background: 'rgba(16, 185, 129, 0.2)',
+                  color: 'var(--emerald-300)',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  fontWeight: 700
+                }}>
+                  {activeField?.area}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <MapPin size={12} color="var(--emerald-400)" />
+                <span>{activeField?.village || `${activeField?.latitude?.toFixed(2)}°N, ${activeField?.longitude?.toFixed(2)}°E`}</span>
+                <span style={{ color: 'var(--text-dim)', margin: '0 4px' }}>&bull;</span>
+                <span style={{ color: 'var(--emerald-400)', fontWeight: 600 }}>Active Digital Twin</span>
               </div>
             </div>
+
+            {/* Change Field Button — PRD Section 17 */}
+            <button
+              onClick={() => setTab('my-fields')}
+              className="btn btn-secondary btn-sm"
+              style={{
+                marginLeft: '6px',
+                padding: '5px 12px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                borderColor: 'rgba(52, 211, 153, 0.4)'
+              }}
+            >
+              <span>Change Field</span>
+            </button>
           </div>
 
+          {/* Right Header Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
-              onClick={() => setIsAddFieldOpen(true)}
+              onClick={() => setIsSelectingField(true)}
               className="btn btn-secondary btn-sm"
+              style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
             >
-              <Plus size={15} />
+              <Plus size={15} color="var(--emerald-400)" />
               <span>+ Add Field on Map</span>
             </button>
+
             <button
               onClick={() => setTab('demo-controls')}
               className="btn btn-primary btn-sm"
+              style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
             >
+              <Sparkles size={14} />
               <span>Demo Mode</span>
             </button>
           </div>
@@ -131,7 +167,7 @@ function AppContent() {
         </main>
       </div>
 
-      {/* Interactive Map Field Creation Modal */}
+      {/* Modal Wizard for Field Creation */}
       <AddFieldModal
         isOpen={isAddFieldOpen}
         onClose={() => setIsAddFieldOpen(false)}

@@ -197,12 +197,12 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Section 2: Campus Field Metadata & Geospatial Coordinates (PRD Section 9) */}
+        {/* Section 2: Active Field Metadata & Geospatial Coordinates */}
         <div className="glass-card">
           <div className="glass-card-header">
             <div className="glass-card-title">
               <MapPin size={18} color="var(--emerald-400)" />
-              <span>Campus Field Geographic & Agronomic Configuration</span>
+              <span>Active Field Geographic & Agronomic Configuration</span>
             </div>
           </div>
 
@@ -321,7 +321,7 @@ export default function Settings() {
                   color: '#fff',
                   fontFamily: 'inherit'
                 }}
-                placeholder="agritwin-campus-prod"
+                placeholder="agritwin-field-prod"
               />
             </div>
 

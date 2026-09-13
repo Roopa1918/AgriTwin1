@@ -83,7 +83,7 @@ export default function WeatherClimate({ setTab }) {
           <div>
             <strong style={{ color: '#fff', fontSize: '0.9rem' }}>CURRENT SIMULATED CONDITIONS (REAL-TIME FIELD TELEMETRY)</strong>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-              Distinct from hypothetical Climate Scenarios. Reflects live simulated readings at the campus weather mast.
+              Distinct from hypothetical Climate Scenarios. Reflects live simulated readings at the field weather station.
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function WeatherClimate({ setTab }) {
             <span>Temperature & Humidity Inverse Dynamic Coupling</span>
           </div>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Real-time correlation observed at the campus mast
+            Real-time correlation observed at the field weather station
           </span>
         </div>
 

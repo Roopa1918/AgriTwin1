@@ -101,7 +101,7 @@ export default function FieldLocation({ setTab }) {
     <div className="page-container">
       <div className="page-header">
         <div className="page-header-text">
-          <h1>Campus Field Location & Geospatial Map</h1>
+          <h1>Field Location & Geospatial Map</h1>
           <p>
             Georeferenced farm parcel mapping with polygon boundaries, soil management zones, 
             and GPS telemetry coordinates.
@@ -164,7 +164,7 @@ export default function FieldLocation({ setTab }) {
             <span>OpenStreetMap & Leaflet Geospatial GIS Viewer</span>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Configurable campus plot &bull; Real-time probe status overlay
+            Configurable agricultural plot &bull; Real-time probe status overlay
           </div>
         </div>
 

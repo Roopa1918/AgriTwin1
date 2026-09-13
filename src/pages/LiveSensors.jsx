@@ -54,7 +54,7 @@ export default function LiveSensors() {
         <div className="page-header-text">
           <h1>Live Sensor Network Telemetry</h1>
           <p>
-            Continuous real-time telemetry stream from campus IoT sensor nodes. 
+            Continuous real-time telemetry stream from active field IoT sensor nodes. 
             All values originate from the automated simulation pipeline without requiring manual entry.
           </p>
         </div>

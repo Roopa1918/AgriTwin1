@@ -134,7 +134,7 @@ export default function Alerts() {
                         {alert.severity}
                       </span>
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
-                        {alert.zoneName || 'Campus Field'}
+                        {alert.zoneName || 'Active Field'}
                       </span>
                       <span style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
                         &bull; {alert.timestamp}

@@ -54,7 +54,7 @@ export default function Dashboard({ setTab }) {
       {/* Page Title & Field Header */}
       <div className="page-header">
         <div className="page-header-text">
-          <h1>Campus Agricultural Field Dashboard</h1>
+          <h1>Agricultural Field Dashboard</h1>
           <p>
             Real-time cyber-physical synchronization between simulated field IoT sensors, 
             3D canopy telemetry, and automated irrigation decision support.
@@ -168,7 +168,7 @@ export default function Dashboard({ setTab }) {
           <div>
             <div className="glass-card-title">
               <Layers size={18} color="var(--emerald-400)" />
-              <span>Campus Field 3D Digital Twin</span>
+              <span>Active Field 3D Digital Twin</span>
             </div>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
               Interactive Three.js agricultural model showing Zone 1–4 vegetation health, probe beacons, and irrigation mist
