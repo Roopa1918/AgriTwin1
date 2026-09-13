@@ -15,7 +15,11 @@ import {
   LogOut, 
   Sparkles,
   Terminal,
-  Sliders
+  Sliders,
+  Leaf,
+  ShieldAlert,
+  Camera,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFields } from '../../context/FieldsContext';
@@ -27,7 +31,11 @@ export default function SimpleNavbar({ currentTab, setTab, onOpenAddField, onOpe
   const farmerNavItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'my-fields', label: 'My Fields', icon: MapPin },
-    { id: 'field-monitor', label: 'Field Monitor', icon: Layers },
+    { id: 'field-monitor', label: '3D Field Twin', icon: Layers },
+    { id: 'plant-health', label: 'Plant & Pest Health', icon: Leaf },
+    { id: 'animal-alerts', label: 'Animal Intrusion', icon: ShieldAlert },
+    { id: 'field-camera', label: 'Field Camera', icon: Camera },
+    { id: 'alerts', label: 'Real-Time Alerts', icon: Bell },
     { id: 'weather', label: 'Weather', icon: CloudSun },
     { id: 'water', label: 'Water', icon: Droplets },
     { id: 'field-history', label: 'Field History', icon: BarChart2 },

@@ -29,6 +29,7 @@ export default function AddFieldModal({ isOpen, onClose }) {
   // Search & Map State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
   const [activeLayer, setActiveLayer] = useState('satellite');
@@ -53,12 +54,15 @@ export default function AddFieldModal({ isOpen, onClose }) {
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
     const timer = setTimeout(async () => {
-      const results = await searchLocations(searchQuery);
+      setIsSearching(true);
+      const results = await searchLocations(searchQuery, fieldCenter, 20);
       setSearchResults(results);
+      setIsSearching(false);
     }, 400);
 
     return () => clearTimeout(timer);
@@ -293,29 +297,75 @@ export default function AddFieldModal({ isOpen, onClose }) {
               </button>
             </div>
 
-            {/* Search Suggestions */}
-            {searchResults.length > 0 && (
+            {/* Search Loading Indicator */}
+            {isSearching && (
               <div style={{
                 background: '#0c2219',
                 border: '1px solid var(--border-medium)',
                 borderRadius: 'var(--radius-md)',
-                maxHeight: '160px',
-                overflowY: 'auto'
+                padding: '12px',
+                textAlign: 'center',
+                color: 'var(--emerald-400)',
+                fontSize: '0.84rem'
+              }}>
+                🔍 Searching places, landmarks & PIN codes...
+              </div>
+            )}
+
+            {/* Rich Search Suggestions */}
+            {!isSearching && searchResults.length > 0 && (
+              <div style={{
+                background: '#0c2219',
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-md)',
+                maxHeight: '260px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                padding: '8px'
               }}>
                 {searchResults.map(s => (
                   <div
                     key={s.id}
-                    onClick={() => handleSelectSearchResult(s)}
                     style={{
-                      padding: '8px 14px',
-                      fontSize: '0.85rem',
-                      borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      cursor: 'pointer'
+                      padding: '10px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px'
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.15)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    <strong>{s.name}</strong> <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>({s.displayName})</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <strong style={{ color: '#fff', fontSize: '0.88rem' }}>{s.name}</strong>
+                        {s.type && (
+                          <span style={{ fontSize: '0.66rem', color: '#60a5fa', background: 'rgba(59,130,246,0.15)', padding: '1px 6px', borderRadius: '8px' }}>
+                            {s.type}
+                          </span>
+                        )}
+                        {s.distance && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--amber-400)', background: 'rgba(245,158,11,0.1)', padding: '1px 5px', borderRadius: '4px' }}>
+                            📍 {s.distance}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                        {s.displayName}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSearchResult(s)}
+                      className="btn btn-primary btn-sm"
+                      style={{ padding: '5px 10px', fontSize: '0.76rem', whiteSpace: 'nowrap' }}
+                    >
+                      Select
+                    </button>
                   </div>
                 ))}
               </div>

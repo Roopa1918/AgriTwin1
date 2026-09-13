@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { useFields } from '../../context/FieldsContext';
 import { useTelemetry } from '../../context/TelemetryContext';
-import { RotateCcw, Droplets, Eye } from 'lucide-react';
+import { RotateCcw, Droplets, Eye, Layers, ShieldAlert, Flame, Check } from 'lucide-react';
 
 export default function DynamicDigitalTwin({ height = 540 }) {
   const containerRef = useRef(null);
@@ -18,10 +18,24 @@ export default function DynamicDigitalTwin({ height = 540 }) {
   const zonePlanesRef = useRef({});
   const sprinklerMistRef = useRef(null);
   const animFrameId = useRef(null);
+  const animalGroupRef = useRef(null);
+  const pestGroupRef = useRef(null);
+  const plantsGroupRef = useRef(null);
 
   const { activeField } = useFields();
   const { zones, isIrrigatingZone2, waterZone2 } = useTelemetry();
   const [hoveredZone, setHoveredZone] = useState(null);
+
+  // 3D Layer Toggles
+  const [layers, setLayers] = useState({
+    zones: true,
+    plants: true,
+    soilSensors: true,
+    pestHotspots: true,
+    animalIntrusion: true
+  });
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
+  const [animalAlertActive, setAnimalAlertActive] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -84,6 +98,10 @@ export default function DynamicDigitalTwin({ height = 540 }) {
     planeGeo.rotateX(-Math.PI / 2);
 
     const meshes = {};
+    const plantsGroup = new THREE.Group();
+    scene.add(plantsGroup);
+    plantsGroupRef.current = plantsGroup;
+
     Object.entries(zoneLayout).forEach(([zId, pos]) => {
       const mat = new THREE.MeshStandardMaterial({
         color: 0x10b981,
@@ -98,7 +116,6 @@ export default function DynamicDigitalTwin({ height = 540 }) {
 
       // Crop Vegetation Rows tailored to active crop
       const isTomato = (activeField?.crop || '').toLowerCase().includes('tomato');
-      const isRice = (activeField?.crop || '').toLowerCase().includes('rice');
 
       for (let r = -2.6; r <= 2.6; r += 1.3) {
         for (let c = -2.8; c <= 2.8; c += 0.8) {
@@ -128,7 +145,7 @@ export default function DynamicDigitalTwin({ height = 540 }) {
           }
 
           plant.position.set(pos.x + c, 0.02, pos.z + r);
-          scene.add(plant);
+          plantsGroup.add(plant);
         }
       }
 
@@ -151,6 +168,98 @@ export default function DynamicDigitalTwin({ height = 540 }) {
       scene.add(pin);
     });
     zonePlanesRef.current = meshes;
+
+    // --- ANIMAL INTRUSION 3D MARKER (Zone 3) ---
+    const animalGroup = new THREE.Group();
+    scene.add(animalGroup);
+    animalGroupRef.current = animalGroup;
+
+    // Pulsing Hazard Ground Ring
+    const hazardRingGeo = new THREE.RingGeometry(1.4, 1.7, 32);
+    hazardRingGeo.rotateX(-Math.PI / 2);
+    const hazardRingMat = new THREE.MeshBasicMaterial({
+      color: 0xef4444,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85
+    });
+    const hazardRing = new THREE.Mesh(hazardRingGeo, hazardRingMat);
+    hazardRing.position.set(-3.8, 0.06, 3.8);
+    animalGroup.add(hazardRing);
+    animalGroup.userData.ring = hazardRing;
+
+    // 3D Billboard Canvas Sprite for Animal Alert
+    const animalCanvas = document.createElement('canvas');
+    animalCanvas.width = 300;
+    animalCanvas.height = 130;
+    const aCtx = animalCanvas.getContext('2d');
+    aCtx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+    aCtx.roundRect ? aCtx.roundRect(0, 0, 300, 130, 16) : aCtx.fillRect(0, 0, 300, 130);
+    aCtx.fill();
+    aCtx.strokeStyle = '#ffffff';
+    aCtx.lineWidth = 4;
+    aCtx.stroke();
+    aCtx.fillStyle = '#ffffff';
+    aCtx.font = 'bold 32px sans-serif';
+    aCtx.textAlign = 'center';
+    aCtx.fillText('🚨 COW INTRUSION', 150, 52);
+    aCtx.font = 'bold 22px sans-serif';
+    aCtx.fillText('Zone 3 • 94% Confidence', 150, 92);
+
+    const animalTexture = new THREE.CanvasTexture(animalCanvas);
+    const animalSpriteMat = new THREE.SpriteMaterial({ map: animalTexture });
+    const animalSprite = new THREE.Sprite(animalSpriteMat);
+    animalSprite.scale.set(3.2, 1.4, 1);
+    animalSprite.position.set(-3.8, 2.4, 3.8);
+    animalGroup.add(animalSprite);
+
+    // Glowing Red Marker Pole
+    const animalPole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.08, 1.8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.6 })
+    );
+    animalPole.position.set(-3.8, 0.9, 3.8);
+    animalGroup.add(animalPole);
+
+    // --- PEST HOTSPOT 3D MARKER (Zone 1 / Row 2) ---
+    const pestGroup = new THREE.Group();
+    scene.add(pestGroup);
+    pestGroupRef.current = pestGroup;
+
+    const pestRingGeo = new THREE.RingGeometry(1.2, 1.45, 24);
+    pestRingGeo.rotateX(-Math.PI / 2);
+    const pestRingMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8
+    });
+    const pestRing = new THREE.Mesh(pestRingGeo, pestRingMat);
+    pestRing.position.set(-3.8, 0.05, -3.8);
+    pestGroup.add(pestRing);
+    pestGroup.userData.ring = pestRing;
+
+    // Billboard Canvas Sprite for Pest Hotspot
+    const pestCanvas = document.createElement('canvas');
+    pestCanvas.width = 280;
+    pestCanvas.height = 110;
+    const pCtx = pestCanvas.getContext('2d');
+    pCtx.fillStyle = 'rgba(245, 158, 11, 0.9)';
+    pCtx.roundRect ? pCtx.roundRect(0, 0, 280, 110, 14) : pCtx.fillRect(0, 0, 280, 110);
+    pCtx.fill();
+    pCtx.fillStyle = '#000000';
+    pCtx.font = 'bold 28px sans-serif';
+    pCtx.textAlign = 'center';
+    pCtx.fillText('🔥 PEST HOTSPOT', 140, 48);
+    pCtx.font = 'bold 20px sans-serif';
+    pCtx.fillText('Chewing Damage: 3 Plants', 140, 84);
+
+    const pestTexture = new THREE.CanvasTexture(pestCanvas);
+    const pestSpriteMat = new THREE.SpriteMaterial({ map: pestTexture });
+    const pestSprite = new THREE.Sprite(pestSpriteMat);
+    pestSprite.scale.set(2.8, 1.1, 1);
+    pestSprite.position.set(-3.8, 2.0, -3.8);
+    pestGroup.add(pestSprite);
 
     // Sprinkler Water Mist Particles (Zone 2)
     const particleCount = 200;
@@ -200,6 +309,20 @@ export default function DynamicDigitalTwin({ height = 540 }) {
       animFrameId.current = requestAnimationFrame(animate);
       controls.update();
 
+      const elapsed = clock.getElapsedTime();
+
+      // Pulsing Animal Intrusion Hazard Ring
+      if (animalGroupRef.current && animalGroupRef.current.userData.ring) {
+        const pulse = 1 + 0.12 * Math.sin(elapsed * 4.5);
+        animalGroupRef.current.userData.ring.scale.set(pulse, pulse, 1);
+      }
+
+      // Pulsing Pest Hotspot Ring
+      if (pestGroupRef.current && pestGroupRef.current.userData.ring) {
+        const pulse = 1 + 0.08 * Math.sin(elapsed * 3);
+        pestGroupRef.current.userData.ring.scale.set(pulse, pulse, 1);
+      }
+
       // Animate Sprinkler Mist
       if (sprinklerMistRef.current) {
         const mist = sprinklerMistRef.current;
@@ -230,6 +353,19 @@ export default function DynamicDigitalTwin({ height = 540 }) {
       renderer.dispose();
     };
   }, [height, activeField?.crop]);
+
+  // Sync Layers Visibility
+  useEffect(() => {
+    if (plantsGroupRef.current) {
+      plantsGroupRef.current.visible = layers.plants;
+    }
+    if (animalGroupRef.current) {
+      animalGroupRef.current.visible = layers.animalIntrusion && animalAlertActive;
+    }
+    if (pestGroupRef.current) {
+      pestGroupRef.current.visible = layers.pestHotspots;
+    }
+  }, [layers, animalAlertActive]);
 
   // Sync Zone Colors with Telemetry (Green = Good, Amber = Watch, Red = Needs Water)
   useEffect(() => {
@@ -264,25 +400,102 @@ export default function DynamicDigitalTwin({ height = 540 }) {
     <div className="twin-3d-wrapper" style={{ height: `${height}px`, position: 'relative' }}>
       <div ref={containerRef} className="twin-3d-canvas" />
 
-      {/* Top Overlay Badge */}
-      <div className="twin-overlay-controls">
+      {/* Top Overlay Badge & 3D Layer Switcher */}
+      <div className="twin-overlay-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <div className="twin-overlay-badge">
           <span className="pulse-dot" style={{ background: '#10b981' }} />
           <span>3D Field Twin: <strong>{activeField?.name} ({activeField?.crop})</strong></span>
         </div>
+
         {hoveredZone && (
           <div className="twin-overlay-badge" style={{ borderColor: 'var(--emerald-400)' }}>
             <Eye size={14} color="var(--emerald-400)" />
             <span>Hovering: {hoveredZone}</span>
           </div>
         )}
+
+        {/* 3D Layers Toggle Button */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowLayerMenu(!showLayerMenu)}
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(9, 24, 17, 0.9)' }}
+          >
+            <Layers size={14} color="var(--emerald-400)" />
+            <span>3D Layers</span>
+          </button>
+
+          {showLayerMenu && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              marginTop: '6px',
+              background: 'rgba(7, 20, 14, 0.98)',
+              border: '1px solid var(--border-medium)',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 12px',
+              minWidth: '190px',
+              zIndex: 100,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              boxShadow: '0 12px 30px rgba(0,0,0,0.8)'
+            }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--emerald-400)', textTransform: 'uppercase' }}>
+                Toggle 3D Visual Layers
+              </span>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#fff', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={layers.plants}
+                  onChange={e => setLayers({ ...layers, plants: e.target.checked })}
+                />
+                <span>🌿 Crop Plants</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#fff', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={layers.pestHotspots}
+                  onChange={e => setLayers({ ...layers, pestHotspots: e.target.checked })}
+                />
+                <span>🔥 Pest Hotspots</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#fff', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={layers.animalIntrusion}
+                  onChange={e => setLayers({ ...layers, animalIntrusion: e.target.checked })}
+                />
+                <span>🚨 Animal Intrusion</span>
+              </label>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Actions */}
-      <div className="twin-overlay-actions">
+      <div className="twin-overlay-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <button onClick={resetCamera} className="btn btn-secondary btn-sm">
           <RotateCcw size={14} /> Reset View
         </button>
+
+        <button
+          onClick={() => setAnimalAlertActive(!animalAlertActive)}
+          className="btn btn-secondary btn-sm"
+          style={{
+            borderColor: animalAlertActive ? 'rgba(239, 68, 68, 0.6)' : 'var(--border-subtle)',
+            color: animalAlertActive ? '#f87171' : 'var(--text-dim)'
+          }}
+          title="Toggle 3D Animal Marker simulation"
+        >
+          <ShieldAlert size={14} color={animalAlertActive ? '#ef4444' : 'var(--text-dim)'} />
+          <span>{animalAlertActive ? 'Animal Marker: Active' : 'Animal Marker: Hidden'}</span>
+        </button>
+
         <button onClick={waterZone2} className="btn btn-water btn-sm">
           <Droplets size={14} /> {isIrrigatingZone2 ? 'Watering Active (Mist Spraying)...' : 'Water Zone 2'}
         </button>

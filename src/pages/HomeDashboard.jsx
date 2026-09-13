@@ -15,7 +15,11 @@ import {
   Sparkles,
   MapPin,
   Clock,
-  Sun
+  Sun,
+  Leaf,
+  ShieldAlert,
+  Camera,
+  Flame
 } from 'lucide-react';
 
 export default function HomeDashboard({ setTab }) {
@@ -193,6 +197,111 @@ export default function HomeDashboard({ setTab }) {
           </div>
           <div className="metric-card-footer">
             <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.72rem' }}>DEMO</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ADVANCED FIELD SENTINEL ROW — Plant Grid, Animal Intrusion & Camera System */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        {/* Plant Health & Pest Sentinel */}
+        <div
+          onClick={() => setTab('plant-health')}
+          className="glass-card"
+          style={{
+            padding: '18px 20px',
+            cursor: 'pointer',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 20, 14, 0.6) 100%)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '8px', borderRadius: '50%' }}>
+              <Leaf size={20} color="var(--emerald-400)" />
+            </div>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--emerald-400)', background: 'rgba(16,185,129,0.15)', padding: '2px 8px', borderRadius: '10px' }}>
+              6×6 MATRIX
+            </span>
+          </div>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+            Plant-Level Health & Pest Grid
+          </h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
+            Track plant-by-plant condition, detect chewing holes, and isolate spatial pest clusters.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--emerald-400)', fontSize: '0.8rem', fontWeight: 700 }}>
+            <span>Open Plant Grid</span>
+            <ArrowRight size={14} />
+          </div>
+        </div>
+
+        {/* Animal Intrusion Sentinel */}
+        <div
+          onClick={() => setTab('animal-alerts')}
+          className="glass-card"
+          style={{
+            padding: '18px 20px',
+            cursor: 'pointer',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(20, 5, 8, 0.6) 100%)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '8px', borderRadius: '50%' }}>
+              <ShieldAlert size={20} color="#ef4444" />
+            </div>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#f87171', background: 'rgba(239, 68, 68, 0.2)', padding: '2px 8px', borderRadius: '10px' }}>
+              🚨 1 ACTIVE ALERT
+            </span>
+          </div>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+            Animal Intrusion Sentinel
+          </h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
+            Cattle and wild boar boundary breaches flagged with acoustic deterrent controls.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fca5a5', fontSize: '0.8rem', fontWeight: 700 }}>
+            <span>Check Animal Alert</span>
+            <ArrowRight size={14} />
+          </div>
+        </div>
+
+        {/* Optical Camera Sentinel */}
+        <div
+          onClick={() => setTab('field-camera')}
+          className="glass-card"
+          style={{
+            padding: '18px 20px',
+            cursor: 'pointer',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(5, 14, 20, 0.6) 100%)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div style={{ background: 'rgba(56, 189, 248, 0.2)', padding: '8px', borderRadius: '50%' }}>
+              <Camera size={20} color="#38bdf8" />
+            </div>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#7dd3fc', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '10px' }}>
+              IR OPTICAL
+            </span>
+          </div>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+            Field Optical Camera System
+          </h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
+            Connect RTSP solar feeds, capture high-res snapshots, and execute edge AI diagnostics.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#7dd3fc', fontSize: '0.8rem', fontWeight: 700 }}>
+            <span>View Optical Feeds</span>
+            <ArrowRight size={14} />
           </div>
         </div>
       </div>

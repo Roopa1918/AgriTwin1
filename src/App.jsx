@@ -25,6 +25,10 @@ import WhatMayHappen from './pages/WhatMayHappen';
 import Reports from './pages/Reports';
 import RawSensorData from './pages/RawSensorData';
 import DemoControls from './pages/DemoControls';
+import PlantHealthPage from './pages/PlantHealthPage';
+import AnimalAlertsPage from './pages/AnimalAlertsPage';
+import FieldCameraPage from './pages/FieldCameraPage';
+import Alerts from './pages/Alerts';
 
 import { Plus, MapPin, Sparkles, LogOut, ChevronDown } from 'lucide-react';
 
@@ -61,6 +65,20 @@ function AppContent() {
         return <MyFields setTab={setTab} onOpenAddField={() => setIsSelectingField(true)} />;
       case 'field-monitor':
         return <FieldMonitor />;
+      case 'plant-health':
+        return <PlantHealthPage onNavigateToAlerts={() => setTab('alerts')} />;
+      case 'animal-alerts':
+        return <AnimalAlertsPage onNavigateTo3D={() => setTab('field-monitor')} />;
+      case 'field-camera':
+        return <FieldCameraPage onNavigateToAnimalAlerts={() => setTab('animal-alerts')} />;
+      case 'alerts':
+        return (
+          <Alerts
+            onNavigateToAnimal={() => setTab('animal-alerts')}
+            onNavigateToPlant={() => setTab('plant-health')}
+            onNavigateTo3D={() => setTab('field-monitor')}
+          />
+        );
       case 'weather':
         return <WeatherPage />;
       case 'water':

@@ -61,12 +61,13 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
-      const results = await searchLocations(searchQuery);
+      const results = await searchLocations(searchQuery, fieldCenter, 20);
       setSearchResults(results);
       setIsSearching(false);
     }, 400);
@@ -421,40 +422,158 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
               </button>
             </div>
 
-            {/* Search Autocomplete Results Dropdown */}
-            {searchResults.length > 0 && (
+            {/* Search Loading Indicator */}
+            {isSearching && (
               <div style={{
                 background: 'rgba(9, 24, 17, 0.98)',
                 border: '1px solid var(--border-medium)',
                 borderRadius: 'var(--radius-lg)',
-                boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
-                overflow: 'hidden'
+                padding: '14px',
+                textAlign: 'center',
+                color: 'var(--emerald-400)',
+                fontSize: '0.88rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px'
               }}>
+                <span className="search-spinner" style={{
+                  display: 'inline-block',
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid rgba(52, 211, 153, 0.2)',
+                  borderTopColor: 'var(--emerald-400)',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite'
+                }} />
+                <span>Searching locations across farms, campuses, landmarks & PIN codes...</span>
+              </div>
+            )}
+
+            {/* Rich Search Results Dropdown List */}
+            {!isSearching && searchResults.length > 0 && (
+              <div style={{
+                background: 'rgba(9, 24, 17, 0.98)',
+                border: '1px solid var(--border-medium)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: '0 20px 48px rgba(0,0,0,0.85)',
+                maxHeight: '380px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '10px'
+              }}>
+                <div style={{
+                  padding: '4px 8px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  color: 'var(--emerald-400)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>📍 Found {searchResults.length} places & landmarks</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Click 'Select Location' to center map</span>
+                </div>
+
                 {searchResults.map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => handleSelectSearchResult(item)}
                     style={{
-                      padding: '12px 18px',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.07)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px 14px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      transition: 'background 0.2s'
+                      justifyContent: 'space-between',
+                      gap: '14px',
+                      transition: 'all 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.12)';
+                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
+                    }}
                   >
-                    <MapPin size={18} color="var(--emerald-400)" />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#fff' }}>
-                        {item.name}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        borderRadius: '50%',
+                        padding: '8px',
+                        marginTop: '2px',
+                        flexShrink: 0
+                      }}>
+                        <MapPin size={18} color="var(--emerald-400)" />
                       </div>
-                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                        {item.displayName}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.94rem', color: '#fff' }}>
+                            {item.name}
+                          </span>
+                          {item.type && (
+                            <span style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              background: 'rgba(59, 130, 246, 0.18)',
+                              color: '#60a5fa',
+                              padding: '2px 7px',
+                              borderRadius: '12px',
+                              border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }}>
+                              {item.type}
+                            </span>
+                          )}
+                          {item.distance && (
+                            <span style={{
+                              fontSize: '0.72rem',
+                              color: 'var(--amber-400)',
+                              fontWeight: 600,
+                              background: 'rgba(245, 158, 11, 0.12)',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              📍 {item.distance}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{
+                          fontSize: '0.78rem',
+                          color: 'var(--text-muted)',
+                          marginTop: '3px',
+                          lineHeight: 1.35,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }} title={item.displayName}>
+                          {item.displayName}
+                        </div>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => handleSelectSearchResult(item)}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        flexShrink: 0,
+                        padding: '7px 14px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>Select Location</span>
+                      <ArrowRight size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
