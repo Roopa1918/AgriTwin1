@@ -31,9 +31,25 @@ export default function FieldMonitor() {
     const map = L.map(mapContainerRef.current, {
       center: [lat, lon],
       zoom: 16,
-      zoomControl: true
+      zoomControl: true,
+      dragging: true,
+      touchZoom: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      boxZoom: true,
+      keyboard: true,
+      tap: false,
+      trackResize: true
     });
     mapInstanceRef.current = map;
+
+    map.dragging.enable();
+    map.touchZoom.enable();
+    map.scrollWheelZoom.enable();
+
+    setTimeout(() => {
+      if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+    }, 200);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',

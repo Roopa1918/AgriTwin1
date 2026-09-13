@@ -43,6 +43,15 @@ export default function AddFieldModal({ isOpen, onClose }) {
   const [fieldName, setFieldName] = useState('My Rice Field');
   const [selectedCrop, setSelectedCrop] = useState('Rice');
   const [customCrop, setCustomCrop] = useState('');
+  const [interactionMode, setInteractionMode] = useState('pan'); // 'pan' | 'draw'
+  const interactionModeRef = useRef(interactionMode);
+
+  useEffect(() => {
+    interactionModeRef.current = interactionMode;
+    if (mapContainerRef.current) {
+      mapContainerRef.current.style.cursor = interactionMode === 'draw' ? 'crosshair' : 'grab';
+    }
+  }, [interactionMode]);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -68,7 +77,7 @@ export default function AddFieldModal({ isOpen, onClose }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Leaflet Map Init
+  // Leaflet Map Init with Free Panning
   useEffect(() => {
     if (!isOpen || step !== 1 || !mapContainerRef.current) return;
 
@@ -80,23 +89,58 @@ export default function AddFieldModal({ isOpen, onClose }) {
     const map = L.map(mapContainerRef.current, {
       center: [fieldCenter.lat, fieldCenter.lng],
       zoom: 15,
-      zoomControl: true
+      zoomControl: true,
+      dragging: true,
+      touchZoom: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      boxZoom: true,
+      keyboard: true,
+      tap: false,
+      trackResize: true,
+      inertia: true,
+      inertiaDeceleration: 3000,
+      inertiaMaxSpeed: Infinity,
+      easeLinearity: 0.2
     });
     mapInstanceRef.current = map;
 
+    // Enable dragging handlers
+    map.dragging.enable();
+    map.touchZoom.enable();
+    map.scrollWheelZoom.enable();
+
     applyTileLayer(map, activeLayer);
     updateMarker(map, fieldCenter.lat, fieldCenter.lng);
+
+    // Invalidate size once modal layout settles
+    const invalidate = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    setTimeout(invalidate, 100);
+    setTimeout(invalidate, 300);
+
+    map.on('dragend', () => {
+      const center = map.getCenter();
+      setFieldCenter({ lat: center.lat, lng: center.lng });
+    });
 
     map.on('click', (e) => {
       const { lat, lng } = e.latlng;
       setFieldCenter({ lat, lng });
 
-      setBoundaryPoints((prev) => {
-        const nextPts = [...prev, [lat, lng]];
-        renderPolygon(map, nextPts);
-        setCalculatedArea(calculatePolygonAcres(nextPts));
-        return nextPts;
-      });
+      if (interactionModeRef.current === 'draw') {
+        setBoundaryPoints((prev) => {
+          const nextPts = [...prev, [lat, lng]];
+          renderPolygon(map, nextPts);
+          setCalculatedArea(calculatePolygonAcres(nextPts));
+          return nextPts;
+        });
+      } else {
+        updateMarker(map, lat, lng);
+      }
 
       reverseGeocode(lat, lng).then(name => setVillageName(name));
     });
@@ -376,6 +420,59 @@ export default function AddFieldModal({ isOpen, onClose }) {
                 <AlertCircle size={14} /> {locationError}
               </div>
             )}
+
+            {/* Mode Switcher: Pan vs Draw */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setInteractionMode('pan')}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: interactionMode === 'pan' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+                  border: interactionMode === 'pan' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
+                  color: interactionMode === 'pan' ? '#34d399' : 'var(--text-muted)',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer'
+                }}
+              >
+                ✋ Pan / Move Map
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInteractionMode('draw')}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: interactionMode === 'draw' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+                  border: interactionMode === 'draw' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
+                  color: interactionMode === 'draw' ? '#34d399' : 'var(--text-muted)',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer'
+                }}
+              >
+                ✏️ Draw Boundary
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (mapInstanceRef.current) {
+                    mapInstanceRef.current.flyTo([fieldCenter.lat, fieldCenter.lng], 16, { duration: 0.8 });
+                  }
+                }}
+                className="btn btn-secondary btn-sm"
+                title="Center on field pin"
+                style={{ padding: '7px 10px', fontSize: '0.78rem' }}
+              >
+                🎯 Center
+              </button>
+            </div>
 
             {/* Map Container */}
             <div

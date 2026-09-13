@@ -48,6 +48,15 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
   const [fieldName, setFieldName] = useState('My Rice Field');
   const [selectedCrop, setSelectedCrop] = useState('Rice');
   const [customCrop, setCustomCrop] = useState('');
+  const [interactionMode, setInteractionMode] = useState('pan'); // 'pan' (Move & explore map) | 'draw' (Draw boundary)
+  const interactionModeRef = useRef(interactionMode);
+
+  useEffect(() => {
+    interactionModeRef.current = interactionMode;
+    if (mapContainerRef.current) {
+      mapContainerRef.current.style.cursor = interactionMode === 'draw' ? 'crosshair' : 'grab';
+    }
+  }, [interactionMode]);
 
   // Refs for Leaflet
   const mapContainerRef = useRef(null);
@@ -75,7 +84,7 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Initialize Map
+  // Initialize Map with Free Panning in All Directions
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -87,9 +96,29 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
     const map = L.map(mapContainerRef.current, {
       center: [fieldCenter.lat, fieldCenter.lng],
       zoom: 15,
-      zoomControl: false
+      zoomControl: false,
+      dragging: true,
+      touchZoom: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      boxZoom: true,
+      keyboard: true,
+      tap: false, // Critical: Disables buggy touch emulation so mouse and touch drag freely
+      trackResize: true,
+      inertia: true,
+      inertiaDeceleration: 3000,
+      inertiaMaxSpeed: Infinity,
+      easeLinearity: 0.2
     });
     mapInstanceRef.current = map;
+
+    // Explicitly enable all pan and zoom handlers
+    map.dragging.enable();
+    map.touchZoom.enable();
+    map.scrollWheelZoom.enable();
+    map.doubleClickZoom.enable();
+    map.boxZoom.enable();
+    map.keyboard.enable();
 
     // Zoom control on top-right
     L.control.zoom({ position: 'topright' }).addTo(map);
@@ -100,25 +129,47 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
     // Initial center pin
     updatePinMarker(map, fieldCenter.lat, fieldCenter.lng);
 
-    // Handle Map Clicks to Draw Boundary
+    // Ensure map container size is accurately computed
+    const invalidate = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    setTimeout(invalidate, 100);
+    setTimeout(invalidate, 400);
+    window.addEventListener('resize', invalidate);
+
+    // When user drags map, sync center coordinates
+    map.on('dragend', () => {
+      const center = map.getCenter();
+      setFieldCenter({ lat: center.lat, lng: center.lng });
+    });
+
+    // Handle Map Clicks: Draw points if in 'draw' mode, or center pin if in 'pan' mode
     map.on('click', (e) => {
       const { lat, lng } = e.latlng;
       setFieldCenter({ lat, lng });
 
-      // Add to boundary points
-      setBoundaryPoints((prev) => {
-        const updated = [...prev, [lat, lng]];
-        renderPolygon(map, updated);
-        const acres = calculatePolygonAcres(updated);
-        setCalculatedArea(acres);
-        return updated;
-      });
+      if (interactionModeRef.current === 'draw') {
+        // Add to boundary points
+        setBoundaryPoints((prev) => {
+          const updated = [...prev, [lat, lng]];
+          renderPolygon(map, updated);
+          const acres = calculatePolygonAcres(updated);
+          setCalculatedArea(acres);
+          return updated;
+        });
+      } else {
+        // In pan mode: update center pin without dropping polygon corners
+        updatePinMarker(map, lat, lng);
+      }
 
       // Reverse geocode to get village name
       reverseGeocode(lat, lng).then(name => setVillageName(name));
     });
 
     return () => {
+      window.removeEventListener('resize', invalidate);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -627,18 +678,83 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
             flexDirection: 'column',
             gap: '12px'
           }}>
+            {/* Mode Switcher: Pan & Move vs Draw Boundary */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setInteractionMode('pan')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  background: interactionMode === 'pan' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+                  border: interactionMode === 'pan' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
+                  color: interactionMode === 'pan' ? '#34d399' : 'var(--text-muted)',
+                  fontWeight: 800,
+                  fontSize: '0.84rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span>✋ Pan / Move Map</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInteractionMode('draw')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  background: interactionMode === 'draw' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+                  border: interactionMode === 'draw' ? '2px solid var(--emerald-400)' : '1px solid var(--border-subtle)',
+                  color: interactionMode === 'draw' ? '#34d399' : 'var(--text-muted)',
+                  fontWeight: 800,
+                  fontSize: '0.84rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span>✏️ Draw Boundary</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (mapInstanceRef.current) {
+                    mapInstanceRef.current.flyTo([fieldCenter.lat, fieldCenter.lng], 16, { duration: 0.8 });
+                  }
+                }}
+                className="btn btn-secondary btn-sm"
+                title="Re-center on selected field pin"
+                style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+              >
+                <span>🎯 Center</span>
+              </button>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <span style={{ fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--emerald-400)', fontWeight: 700, letterSpacing: '0.04em' }}>
-                  Field Boundary Tool
+                  {interactionMode === 'pan' ? 'Navigation Mode' : 'Boundary Drawing Mode'}
                 </span>
-                <div style={{ fontSize: '0.94rem', fontWeight: 600, color: '#fff' }}>
-                  {boundaryPoints.length >= 3 ? (
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#fff', marginTop: '2px' }}>
+                  {interactionMode === 'pan' ? (
+                    <span>✋ Click & drag anywhere to move freely. Zoom in/out to find your field.</span>
+                  ) : boundaryPoints.length >= 3 ? (
                     <span style={{ color: 'var(--emerald-400)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <CheckCircle2 size={16} /> Field selected successfully ✓
+                      <CheckCircle2 size={16} /> Boundary polygon completed ✓
                     </span>
                   ) : (
-                    <span>✏️ Tap on the map around your field to draw boundary</span>
+                    <span>✏️ Click corners on the map around your land to draw boundary</span>
                   )}
                 </div>
               </div>
@@ -651,7 +767,8 @@ export default function SelectFieldPage({ onCancel, onFieldCreated }) {
                   padding: '6px 12px',
                   fontWeight: 800,
                   fontSize: '0.92rem',
-                  color: 'var(--emerald-300)'
+                  color: 'var(--emerald-300)',
+                  whiteSpace: 'nowrap'
                 }}>
                   Area: {calculatedArea} acres
                 </div>
