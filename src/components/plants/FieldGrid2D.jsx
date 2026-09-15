@@ -18,7 +18,7 @@ export default function FieldGrid2D({
 
   // Determine if a specific plant belongs to any active hotspot cluster
   const isPlantInHotspot = (plantId) => {
-    return hotspots.some(h => h.plantIds && h.plantIds.includes(plantId));
+    return (hotspots || []).some(h => Array.isArray(h?.plantIds) && h.plantIds.includes(plantId));
   };
 
   const getStatusBadge = (status) => {

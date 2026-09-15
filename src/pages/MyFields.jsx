@@ -24,7 +24,7 @@ export default function MyFields({ setTab, onOpenAddField }) {
 
         <button onClick={onOpenAddField} className="btn btn-primary" style={{ fontWeight: 700 }}>
           <Plus size={18} />
-          <span>+ Add New Field</span>
+          <span>+ Add My Field</span>
         </button>
       </div>
 
@@ -106,7 +106,7 @@ export default function MyFields({ setTab, onOpenAddField }) {
                     <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>{field.name}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--emerald-400)', fontSize: '0.84rem', marginTop: '2px' }}>
                       <MapPin size={13} />
-                      <span>{field.village || 'Field Location'}</span>
+                      <span>{field.crop || 'Crop'} &bull; {field.village || 'Field Location'}</span>
                     </div>
                   </div>
                 </div>
@@ -128,7 +128,7 @@ export default function MyFields({ setTab, onOpenAddField }) {
                 {/* 4 Dynamic Zones Status */}
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    4 Zones Soil Moisture:
+                    Soil Water by Zone:
                   </span>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', textAlign: 'center', fontSize: '0.76rem' }}>
                     {field.zones?.map((z, idx) => (

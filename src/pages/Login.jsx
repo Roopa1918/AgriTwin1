@@ -193,8 +193,8 @@ export default function Login() {
         {/* Global Error Banner */}
         {(authError || statusMessage) && (
           <div style={{
-            background: statusMessage.includes('sent') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${statusMessage.includes('sent') ? 'var(--emerald-500)' : '#ef4444'}`,
+            background: (statusMessage ?? '').includes('sent') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            border: `1px solid ${(statusMessage ?? '').includes('sent') ? 'var(--emerald-500)' : '#ef4444'}`,
             borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             marginBottom: '20px',
@@ -202,9 +202,9 @@ export default function Login() {
             alignItems: 'center',
             gap: '10px',
             fontSize: '0.85rem',
-            color: statusMessage.includes('sent') ? 'var(--emerald-300)' : '#fca5a5'
+            color: (statusMessage ?? '').includes('sent') ? 'var(--emerald-300)' : '#fca5a5'
           }}>
-            {statusMessage.includes('sent') ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+            {(statusMessage ?? '').includes('sent') ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
             <span>{authError || statusMessage}</span>
           </div>
         )}

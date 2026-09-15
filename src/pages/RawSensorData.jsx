@@ -81,7 +81,7 @@ export default function RawSensorData() {
                     <td style={{ padding: '12px', color: '#38bdf8', fontWeight: 700 }}>{row.sensor}</td>
                     <td style={{ padding: '12px', color: '#fff' }}>{row.zone}</td>
                     <td style={{ padding: '12px', color: '#cbd5e1' }}>{row.reading}</td>
-                    <td style={{ padding: '12px', color: row.value.includes('24.') || row.value.includes('25.') ? '#f87171' : 'var(--emerald-400)', fontWeight: 800 }}>
+                    <td style={{ padding: '12px', color: String(row?.value ?? '').includes('24.') || String(row?.value ?? '').includes('25.') ? '#f87171' : 'var(--emerald-400)', fontWeight: 800 }}>
                       {row.value}
                     </td>
                   </tr>
@@ -93,7 +93,7 @@ export default function RawSensorData() {
           {/* Mobile Card View (< 768px) — PRD Section 11 */}
           <div className="table-mobile-card-view">
             {streamRows.map((row, idx) => {
-              const isAlert = row.value.includes('24.') || row.value.includes('25.');
+              const isAlert = String(row?.value ?? '').includes('24.') || String(row?.value ?? '').includes('25.');
               return (
                 <div
                   key={idx}

@@ -12,7 +12,11 @@ export default function RawData() {
 
   const filteredReadings = rawReadings.filter(r => {
     if (filterSensor !== 'ALL' && r.sensorId !== filterSensor) return false;
-    if (searchTerm && !r.parameter.toLowerCase().includes(searchTerm.toLowerCase()) && !r.sensorId.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (
+      searchTerm &&
+      !(r?.parameter || '').toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !(r?.sensorId || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
       return false;
     }
     return true;

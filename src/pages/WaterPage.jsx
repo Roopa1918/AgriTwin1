@@ -70,8 +70,8 @@ export default function WaterPage() {
 
       {/* Simple Recommendation Card (PRD Section 15) */}
       <div style={{
-        background: simpleRecommendation.title.includes('WATER NEEDED') ? 'rgba(239, 68, 68, 0.16)' : 'rgba(16, 185, 129, 0.16)',
-        border: `2px solid ${simpleRecommendation.title.includes('WATER NEEDED') ? '#ef4444' : '#10b981'}`,
+        background: (simpleRecommendation?.title ?? '').includes('WATER NEEDED') ? 'rgba(239, 68, 68, 0.16)' : 'rgba(16, 185, 129, 0.16)',
+        border: `2px solid ${(simpleRecommendation?.title ?? '').includes('WATER NEEDED') ? '#ef4444' : '#10b981'}`,
         borderRadius: 'var(--radius-xl)',
         padding: '24px',
         display: 'flex',
@@ -81,8 +81,8 @@ export default function WaterPage() {
         gap: '16px'
       }}>
         <div>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: simpleRecommendation.title.includes('WATER NEEDED') ? '#f87171' : 'var(--emerald-400)', letterSpacing: '0.04em' }}>
-            {simpleRecommendation.title}
+          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: (simpleRecommendation?.title ?? '').includes('WATER NEEDED') ? '#f87171' : 'var(--emerald-400)', letterSpacing: '0.04em' }}>
+            {simpleRecommendation?.title || 'WATER STATUS'}
           </span>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: '4px 0' }}>
             {simpleRecommendation.text}

@@ -56,10 +56,10 @@ export default class ErrorBoundary extends React.Component {
           }}>
             <AlertTriangle size={24} style={{ margin: '0 auto 8px', display: 'block', color: '#f87171' }} />
             <strong style={{ fontSize: '0.95rem', display: 'block', color: '#fff', marginBottom: '4px' }}>
-              {this.props.title || 'Component Display Notice'}
+              {this.props.title || 'Some field information could not be loaded.'}
             </strong>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted, #94a3b8)', margin: '0 0 14px' }}>
-              {this.state.error?.message || 'A temporary rendering issue occurred in this section.'}
+              Some field information could not be loaded.
             </p>
             <button
               type="button"
@@ -68,7 +68,7 @@ export default class ErrorBoundary extends React.Component {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <RotateCcw size={14} />
-              <span>Retry Component</span>
+              <span>Try Again</span>
             </button>
           </div>
         );

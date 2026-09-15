@@ -167,7 +167,7 @@ export default function WhatIf() {
 
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Water Need</span>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: current.waterNeedEffect.includes('High') ? '#ef4444' : '#34d399', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: (current?.waterNeedEffect ?? '').includes('High') ? '#ef4444' : '#34d399', marginTop: '4px' }}>
               {current.waterNeedEffect}
             </div>
           </div>

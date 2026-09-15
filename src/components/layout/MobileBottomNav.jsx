@@ -26,7 +26,8 @@ import {
   Sliders,
   Plus,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFields } from '../../context/FieldsContext';
@@ -54,29 +55,31 @@ export default function MobileBottomNav({
   // Secondary pages grouped for the "More" slide-up drawer
   const moreSections = [
     {
-      title: 'Digital Twin & Field Health',
+      title: 'Field Twin & Health',
       items: [
-        { id: 'field-monitor', label: '3D Field Twin', icon: Layers, desc: 'Interactive 3D model with moisture & sensors' },
-        { id: 'plant-health', label: 'Plant & Pest Health', icon: Leaf, desc: '2D grid, leaf diagnosis & pest hotspots' },
-        { id: 'animal-alerts', label: 'Animal Intrusion', icon: ShieldAlert, desc: 'Perimeter threat AI detection' },
-        { id: 'field-camera', label: 'Field Camera', icon: Camera, desc: 'Live solar-powered camera feed' },
-        { id: 'alerts', label: 'Real-Time Alerts', icon: Bell, desc: 'Threats, moisture deficits & warnings' }
+        { id: 'field-monitor', label: '3D Field Twin', icon: Layers, desc: 'Interactive 3D model with soil water' },
+        { id: 'plant-health', label: 'Plant Check', icon: Leaf, desc: 'Plant health grid & leaf diagnosis' },
+        { id: 'animal-alerts', label: 'Animal Alert', icon: ShieldAlert, desc: 'Perimeter animal entry detection' },
+        { id: 'alerts', label: 'Farm Alerts', icon: Bell, desc: 'Warnings, water deficits & notifications' },
+        { id: 'field-camera', label: 'Field Camera', icon: Camera, desc: 'View field camera snapshots' }
       ]
     },
     {
-      title: 'Simulation & Intelligence',
+      title: 'Insights & Simulation',
       items: [
-        { id: 'field-history', label: 'Field History', icon: BarChart2, desc: 'Historical soil moisture, temp & rain graphs' },
-        { id: 'what-if', label: 'What-If Simulation', icon: CloudRain, desc: 'Simulate rain, heatwaves & dry spells' },
-        { id: 'what-may-happen', label: 'What May Happen', icon: Sparkles, desc: 'Predictive 48h agronomic forecasts' },
-        { id: 'reports', label: 'Farm Reports', icon: HelpCircle, desc: 'Downloadable irrigation & health summaries' }
+        { id: 'field-history', label: 'Field History', icon: BarChart2, desc: 'Past soil water, temp & rain records' },
+        { id: 'what-if', label: 'Try Weather Changes', icon: CloudRain, desc: 'Simulate rain, heatwaves & dry spells' },
+        { id: 'what-may-happen', label: 'What May Happen', icon: Sparkles, desc: 'Next 48h agronomic predictions' },
+        { id: 'reports', label: 'Farm Reports', icon: HelpCircle, desc: 'Download field summary reports' }
       ]
     },
     {
-      title: 'Engineering & Controls',
+      title: 'Tools & Configuration',
       items: [
-        { id: 'raw-sensors', label: 'Sensor Data (IoT)', icon: Terminal, desc: 'Live ESP32 telemetry packet feed' },
-        { id: 'demo-controls', label: 'Demo Mode Controls', icon: Sliders, desc: 'Simulate dry conditions, pests & alerts' }
+        { id: 'raw-sensors', label: 'Field Data (IoT)', icon: Terminal, desc: 'Raw sensor readings & telemetry' },
+        { id: 'demo-controls', label: 'Demo Mode', icon: Sliders, desc: 'Simulate dry conditions, pests & alerts' },
+        { id: 'settings', label: 'Settings', icon: SettingsIcon, desc: 'Field & sensor thresholds' },
+        { id: 'how-it-works', label: 'Help & Guide', icon: HelpCircle, desc: 'How AgriTwin works' }
       ]
     }
   ];
@@ -85,7 +88,7 @@ export default function MobileBottomNav({
   const isSecondaryActive = [
     'field-monitor', 'plant-health', 'animal-alerts', 'field-camera',
     'alerts', 'field-history', 'what-if', 'what-may-happen', 'reports',
-    'raw-sensors', 'demo-controls'
+    'raw-sensors', 'demo-controls', 'settings', 'how-it-works'
   ].includes(currentTab);
 
   return (

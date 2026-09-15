@@ -31,6 +31,8 @@ import PlantHealthPage from './pages/PlantHealthPage';
 import AnimalAlertsPage from './pages/AnimalAlertsPage';
 import FieldCameraPage from './pages/FieldCameraPage';
 import Alerts from './pages/Alerts';
+import Settings from './pages/Settings';
+import HowItWorks from './pages/HowItWorks';
 
 import MobileBottomNav from './components/layout/MobileBottomNav';
 import { Plus, MapPin, Sparkles, LogOut, ChevronDown, Bell, Menu } from 'lucide-react';
@@ -99,6 +101,10 @@ function AppContent() {
         return <RawSensorData />;
       case 'demo-controls':
         return <DemoControls setTab={setTab} />;
+      case 'settings':
+        return <Settings />;
+      case 'how-it-works':
+        return <HowItWorks />;
       default:
         return <HomeDashboard setTab={setTab} />;
     }
